@@ -28,6 +28,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".activities.CreatePackageActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".activities.AdminDashboardActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
 

@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Login valid", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
         finish();
     }
 }
