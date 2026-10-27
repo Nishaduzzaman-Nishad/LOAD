@@ -1,5 +1,10 @@
 package com.example.load.models;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "packages")
 public class Package {
 
     public static final String STATUS_PENDING   = "PENDING";
@@ -8,17 +13,20 @@ public class Package {
     public static final String STATUS_DELIVERED = "DELIVERED";
     public static final String STATUS_FAILED    = "FAILED";
 
+    @PrimaryKey(autoGenerate = false)
+    @NonNull
     private String packageId;
+
     private String pickupAddress;
     private String dropAddress;
     private String receiverPhone;
     private double weightKg;
-    private String packageType;    // "Fragile", "Standard", "Document"
-    private String priority;       // "URGENT" or "NORMAL"
+    private String packageType;
+    private String priority;
     private String status;
     private String assignedRiderId;
     private String customerId;
-    private String otp;            // 4-digit delivery OTP
+    private String otp;
     private long createdAt;
     private String pickupPhotoUrl;
     private String deliveryPhotoUrl;
@@ -41,7 +49,6 @@ public class Package {
         this.createdAt = System.currentTimeMillis();
     }
 
-    // Getters and Setters
     public String getPackageId() { return packageId; }
     public void setPackageId(String packageId) { this.packageId = packageId; }
 

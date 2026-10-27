@@ -36,6 +36,17 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
         holder.tvDropAddress.setText("Drop: " + pkg.getDropAddress());
         holder.tvWeight.setText(pkg.getWeightKg() + " kg");
         holder.tvStatus.setText(pkg.getStatus());
+
+        // Add this color logic
+        int colorResId;
+        if (pkg.getStatus().equals(Package.STATUS_DELIVERED)) {
+            colorResId = R.color.successGreen;
+        } else if (pkg.getStatus().equals(Package.STATUS_PENDING)) {
+            colorResId = R.color.accent; // Yellow
+        } else {
+            colorResId = R.color.primary; // Navy
+        }
+        holder.tvStatus.setTextColor(holder.itemView.getContext().getResources().getColor(colorResId));
     }
 
     @Override

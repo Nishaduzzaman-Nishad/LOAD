@@ -5,7 +5,8 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/accent</item>
         <item name="colorSecondaryVariant">@color/accent</item>
-        <item name="colorOnSecondary">@color/white</item>
-        <item name="android:statusBarColor">@color/primaryDark</item>
+        <item name="colorOnSecondary">@color/primary</item> <!-- Navy text on Yellow buttons -->
+        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 </resources>

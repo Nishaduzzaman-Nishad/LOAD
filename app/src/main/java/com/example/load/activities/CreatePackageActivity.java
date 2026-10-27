@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.load.R;
+import com.example.load.database.AppDatabase;
 import com.example.load.models.Package;
 import com.example.load.models.ValidationUtils;
 
@@ -48,6 +49,7 @@ public class CreatePackageActivity extends AppCompatActivity {
         });
     }
 
+    // Replace your entire savePackage() method with this:
     private void savePackage() {
         String pickup = etPickup.getText().toString().trim();
         String drop = etDrop.getText().toString().trim();
@@ -75,16 +77,9 @@ public class CreatePackageActivity extends AppCompatActivity {
 
         Package newPackage = new Package(packageId, pickup, drop, phone, weight, type, priority);
 
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra("NEW_PACKAGE_ID", newPackage.getPackageId());
-        returnIntent.putExtra("NEW_PACKAGE_PICKUP", newPackage.getPickupAddress());
-        returnIntent.putExtra("NEW_PACKAGE_DROP", newPackage.getDropAddress());
-        returnIntent.putExtra("NEW_PACKAGE_PHONE", newPackage.getReceiverPhone());
-        returnIntent.putExtra("NEW_PACKAGE_WEIGHT", newPackage.getWeightKg());
-        returnIntent.putExtra("NEW_PACKAGE_TYPE", newPackage.getPackageType());
-        returnIntent.putExtra("NEW_PACKAGE_PRIORITY", newPackage.getPriority());
+        AppDatabase.getInstance(this).packageDao().insert(newPackage);
 
-        setResult(RESULT_OK, returnIntent);
+        setResult(RESULT_OK);
         finish();
     }
 }
