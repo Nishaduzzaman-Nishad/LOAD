@@ -8,7 +8,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.load.MainActivity;
 import com.example.load.R;
 import com.example.load.models.ValidationUtils;
 
@@ -62,7 +61,12 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Login valid", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+
+        if (email.toLowerCase().contains("rider")) {
+            startActivity(new Intent(LoginActivity.this, RiderDashboardActivity.class));
+        } else {
+            startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+        }
         finish();
     }
 }

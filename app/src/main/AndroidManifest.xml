@@ -28,11 +28,15 @@
             android:exported="false" />
 
         <activity
+            android:name=".activities.AdminDashboardActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".activities.CreatePackageActivity"
             android:exported="false" />
 
         <activity
-            android:name=".activities.AdminDashboardActivity"
+            android:name=".activities.RiderDashboardActivity"
             android:exported="false" />
 
         <activity
