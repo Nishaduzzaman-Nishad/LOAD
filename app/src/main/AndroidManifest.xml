@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -28,6 +30,8 @@
         <activity android:name=".activities.RiderDashboardActivity" android:exported="false" />
         <activity android:name=".activities.DeliveryActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
+
+        <service android:name=".services.ShiftService" />
 
     </application>
 </manifest>

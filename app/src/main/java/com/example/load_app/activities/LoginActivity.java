@@ -26,6 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Manual Firebase Initialization
         if (FirebaseApp.getApps(this).isEmpty()) {
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setApiKey("AIzaSyBzGU3NJV8-y5wDwmn3jOTw95e88HKxZeM")
@@ -59,12 +60,17 @@ public class LoginActivity extends AppCompatActivity {
         if (passwordError != null) { etPassword.setError(passwordError); return; }
 
         btnLogin.setEnabled(false);
+
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 String userId = mAuth.getCurrentUser().getUid();
+
+                // Fetch user role from Firestore
                 db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         String role = doc.getString("role");
+                        Toast.makeText(LoginActivity.this, "Logged in as: " + role, Toast.LENGTH_SHORT).show();
+
                         if ("RIDER".equals(role)) {
                             startActivity(new Intent(LoginActivity.this, RiderDashboardActivity.class));
                         } else {
@@ -72,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         finish();
                     } else {
-                        Toast.makeText(LoginActivity.this, "User data not found in DB", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "User data not found in database.", Toast.LENGTH_LONG).show();
                         btnLogin.setEnabled(true);
                     }
                 });
