@@ -1,4 +1,4 @@
-package com.example.load.models;
+package com.example.load_app.models;
 
 import java.util.regex.Pattern;
 

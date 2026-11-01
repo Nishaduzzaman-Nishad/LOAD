@@ -5,9 +5,9 @@
     <color name="accent">#FFC107</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="background">#F4F6FA</color>
-    <color name="textPrimary">#0B2D4A</color>
-    <color name="textSecondary">#6B7280</color>
+    <color name="background">#121212</color>
+    <color name="textPrimary">#E0E0E0</color>
+    <color name="textSecondary">#9E9E9E</color>
     <color name="errorRed">#EF4444</color>
-    <color name="successGreen">#2E7D32</color>
+    <color name="successGreen">#4CAF50</color>
 </resources>

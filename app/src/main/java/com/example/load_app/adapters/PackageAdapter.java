@@ -1,4 +1,4 @@
-package com.example.load.adapters;
+package com.example.load_app.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.load.R;
-import com.example.load.models.Package;
+import com.example.load_app.R;
+import com.example.load_app.models.Package;
 
 import java.util.List;
 
@@ -17,14 +17,23 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
 
     private List<Package> packageList;
     private OnAssignClickListener assignClickListener;
+    private OnPackageClickListener packageClickListener;
 
     public interface OnAssignClickListener {
         void onAssignClick(Package pkg);
     }
 
+    public interface OnPackageClickListener {
+        void onPackageClick(Package pkg);
+    }
+
     public PackageAdapter(List<Package> packageList, OnAssignClickListener listener) {
         this.packageList = packageList;
         this.assignClickListener = listener;
+    }
+
+    public void setOnPackageClickListener(OnPackageClickListener listener) {
+        this.packageClickListener = listener;
     }
 
     @NonNull
@@ -54,8 +63,12 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
         if (pkg.getStatus().equals(Package.STATUS_PENDING) && assignClickListener != null) {
             holder.btnAssign.setVisibility(View.VISIBLE);
             holder.btnAssign.setOnClickListener(v -> assignClickListener.onAssignClick(pkg));
+            holder.itemView.setOnClickListener(null);
         } else {
             holder.btnAssign.setVisibility(View.GONE);
+            if (packageClickListener != null) {
+                holder.itemView.setOnClickListener(v -> packageClickListener.onPackageClick(pkg));
+            }
         }
     }
 

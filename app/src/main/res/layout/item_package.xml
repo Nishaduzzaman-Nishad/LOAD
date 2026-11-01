@@ -4,8 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeColor="#E0E0E0"
+    app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,10 +18,10 @@
             android:id="@+id/tvPackageId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="P001"
+            android:text="PKG-001"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:textColor="@color/textPrimary"
+            android:textColor="@color/primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,9 +32,13 @@
             android:text="PENDING"
             android:textSize="12sp"
             android:textStyle="bold"
+            android:background="@drawable/badge_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             android:textColor="@color/accent"
+            app:layout_constraintBottom_toBottomOf="@id/tvPackageId"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/tvPackageId" />
 
         <TextView
             android:id="@+id/tvDropAddress"
@@ -40,7 +46,7 @@
             android:layout_height="wrap_content"
             android:text="Drop: Gulshan Road 12"
             android:textSize="14sp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:textColor="@color/textSecondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,9 +58,22 @@
             android:layout_height="wrap_content"
             android:text="5.0 kg"
             android:textSize="14sp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:textColor="@color/textSecondary"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDropAddress" />
+
+        <Button
+            android:id="@+id/btnAssign"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Assign"
+            android:textColor="@color/primary"
+            android:backgroundTint="@color/accent"
+            android:layout_marginTop="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvDropAddress" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

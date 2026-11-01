@@ -1,4 +1,4 @@
-package com.example.load.models;
+package com.example.load_app.models;
 
 public class Rider extends User {
 

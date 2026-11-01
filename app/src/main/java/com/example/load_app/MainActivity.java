@@ -1,4 +1,4 @@
-package com.example.load;
+package com.example.load_app;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
