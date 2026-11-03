@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else if ("CUSTOMER".equals(role)) {
                             startActivity(new Intent(LoginActivity.this, CustomerDashboardActivity.class));
                         } else if ("P2P".equals(role)) {
-                            //startActivity(new Intent(LoginActivity.this, P2PDashboardActivity.class));
+                            startActivity(new Intent(LoginActivity.this, P2PDashboardActivity.class));
                         } else {
                             startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
                         }
