@@ -41,16 +41,29 @@
             app:layout_constraintTop_toTopOf="@id/tvPackageId" />
 
         <TextView
+            android:id="@+id/tvOtpDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OTP: 1234"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/accent"
+            android:visibility="gone"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPackageId" />
+
+        <TextView
             android:id="@+id/tvDropAddress"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Drop: Gulshan Road 12"
             android:textSize="14sp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:textColor="@color/textSecondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvPackageId" />
+            app:layout_constraintTop_toBottomOf="@id/tvOtpDisplay" />
 
         <TextView
             android:id="@+id/tvWeight"
@@ -67,7 +80,7 @@
             android:id="@+id/btnAssign"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:text="Assign"
+            android:text="ASSIGN"
             android:textColor="@color/primary"
             android:backgroundTint="@color/accent"
             android:layout_marginTop="12dp"

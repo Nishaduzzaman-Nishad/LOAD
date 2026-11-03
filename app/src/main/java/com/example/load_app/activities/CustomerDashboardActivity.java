@@ -55,12 +55,12 @@ public class CustomerDashboardActivity extends AppCompatActivity {
         });
 
         btnCreateRequest.setOnClickListener(v -> {
-            // We will update CreatePackageActivity next to handle OTPs!
             startActivity(new Intent(CustomerDashboardActivity.this, CreatePackageActivity.class));
         });
 
         customerPackages = new ArrayList<>();
-        adapter = new PackageAdapter(customerPackages, null);
+        // Passing "CUSTOMER" as the userRole
+        adapter = new PackageAdapter(customerPackages, null, "CUSTOMER");
         rvCustomerPackages.setLayoutManager(new LinearLayoutManager(this));
         rvCustomerPackages.setAdapter(adapter);
 
@@ -82,7 +82,6 @@ public class CustomerDashboardActivity extends AppCompatActivity {
                 customerPackages.clear();
                 for (DocumentSnapshot doc : value.getDocuments()) {
                     Package p = doc.toObject(Package.class);
-                    // Only show packages created by THIS customer
                     if (p != null && myId.equals(p.getCustomerId())) {
                         customerPackages.add(p);
                     }

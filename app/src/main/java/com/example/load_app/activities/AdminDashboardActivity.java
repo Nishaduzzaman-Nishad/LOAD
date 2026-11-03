@@ -84,7 +84,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
         listViewRiders = findViewById(R.id.listViewRiders);
         btnCreatePackage = findViewById(R.id.btnCreatePackage);
 
-        // Theme Toggle Logic
         int currentNightMode = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
         switchTheme.setChecked(currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES);
         switchTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -95,7 +94,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
             }
         });
 
-        // Logout Logic
         tvLogout.setOnClickListener(v -> {
             mAuth.signOut();
             startActivity(new Intent(AdminDashboardActivity.this, LoginActivity.class));
@@ -103,7 +101,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
         });
 
         packageList = new ArrayList<>();
-        adapter = new PackageAdapter(packageList, this);
+        // Passing "ADMIN" as the userRole
+        adapter = new PackageAdapter(packageList, this, "ADMIN");
         recyclerViewPackages.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPackages.setAdapter(adapter);
 

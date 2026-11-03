@@ -18,6 +18,7 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
     private List<Package> packageList;
     private OnAssignClickListener assignClickListener;
     private OnPackageClickListener packageClickListener;
+    private String userRole; // NEW: To track who is viewing the list
 
     public interface OnAssignClickListener {
         void onAssignClick(Package pkg);
@@ -27,9 +28,11 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
         void onPackageClick(Package pkg);
     }
 
-    public PackageAdapter(List<Package> packageList, OnAssignClickListener listener) {
+    // Updated Constructor to take userRole
+    public PackageAdapter(List<Package> packageList, OnAssignClickListener listener, String userRole) {
         this.packageList = packageList;
         this.assignClickListener = listener;
+        this.userRole = userRole;
     }
 
     public void setOnPackageClickListener(OnPackageClickListener listener) {
@@ -60,8 +63,24 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
         }
         holder.tvStatus.setTextColor(holder.itemView.getContext().getResources().getColor(colorResId));
 
+        // Show OTP only to the Customer
+        if ("CUSTOMER".equals(userRole) && pkg.getOtp() != null) {
+            holder.tvOtpDisplay.setVisibility(View.VISIBLE);
+            holder.tvOtpDisplay.setText("OTP: " + pkg.getOtp());
+        } else {
+            holder.tvOtpDisplay.setVisibility(View.GONE);
+        }
+
         if (pkg.getStatus().equals(Package.STATUS_PENDING) && assignClickListener != null) {
             holder.btnAssign.setVisibility(View.VISIBLE);
+
+            // Change button text based on role
+            if ("P2P".equals(userRole)) {
+                holder.btnAssign.setText("ACCEPT");
+            } else {
+                holder.btnAssign.setText("ASSIGN");
+            }
+
             holder.btnAssign.setOnClickListener(v -> assignClickListener.onAssignClick(pkg));
             holder.itemView.setOnClickListener(null);
         } else {
@@ -78,7 +97,7 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
     }
 
     public static class PackageViewHolder extends RecyclerView.ViewHolder {
-        TextView tvPackageId, tvDropAddress, tvWeight, tvStatus;
+        TextView tvPackageId, tvDropAddress, tvWeight, tvStatus, tvOtpDisplay;
         Button btnAssign;
 
         public PackageViewHolder(@NonNull View itemView) {
@@ -87,6 +106,7 @@ public class PackageAdapter extends RecyclerView.Adapter<PackageAdapter.PackageV
             tvDropAddress = itemView.findViewById(R.id.tvDropAddress);
             tvWeight = itemView.findViewById(R.id.tvWeight);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvOtpDisplay = itemView.findViewById(R.id.tvOtpDisplay); // Added to XML below
             btnAssign = itemView.findViewById(R.id.btnAssign);
         }
     }

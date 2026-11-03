@@ -63,7 +63,6 @@ public class RiderDashboardActivity extends AppCompatActivity {
         tvLogout = findViewById(R.id.tvLogout);
         switchTheme = findViewById(R.id.switchTheme);
 
-        // Theme Toggle Logic
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         switchTheme.setChecked(currentNightMode == Configuration.UI_MODE_NIGHT_YES);
         switchTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -74,7 +73,6 @@ public class RiderDashboardActivity extends AppCompatActivity {
             }
         });
 
-        // Logout Logic
         tvLogout.setOnClickListener(v -> {
             mAuth.signOut();
             startActivity(new Intent(RiderDashboardActivity.this, LoginActivity.class));
@@ -82,7 +80,8 @@ public class RiderDashboardActivity extends AppCompatActivity {
         });
 
         riderPackages = new ArrayList<>();
-        adapter = new PackageAdapter(riderPackages, null);
+        // Passing "RIDER" as the userRole
+        adapter = new PackageAdapter(riderPackages, null, "RIDER");
         adapter.setOnPackageClickListener(pkg -> {
             Intent intent = new Intent(RiderDashboardActivity.this, DeliveryActivity.class);
             intent.putExtra("PACKAGE_ID", pkg.getPackageId());

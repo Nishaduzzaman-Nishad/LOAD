@@ -53,6 +53,7 @@ public class P2PDashboardActivity extends AppCompatActivity {
         });
 
         p2pPackages = new ArrayList<>();
+        // Passing "P2P" as the userRole
         adapter = new PackageAdapter(p2pPackages, pkg -> {
             db.collection("users").document(mAuth.getCurrentUser().getUid()).get().addOnSuccessListener(doc -> {
                 String myName = doc.getString("fullName");
@@ -62,7 +63,7 @@ public class P2PDashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(P2PDashboardActivity.this, RiderDashboardActivity.class));
                 finish();
             });
-        });
+        }, "P2P");
 
         rvP2PPackages.setLayoutManager(new LinearLayoutManager(this));
         rvP2PPackages.setAdapter(adapter);

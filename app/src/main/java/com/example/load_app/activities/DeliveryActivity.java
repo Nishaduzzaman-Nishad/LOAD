@@ -1,13 +1,16 @@
 package com.example.load_app.activities;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,8 +28,6 @@ import com.example.load_app.models.Package;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 
@@ -36,7 +37,7 @@ public class DeliveryActivity extends AppCompatActivity {
     private ImageView ivProofPhoto;
     private Package currentPackage;
     private FirebaseFirestore db;
-    private FirebaseStorage storage;
+    private ProgressDialog progressDialog;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int CAMERA_REQUEST_CODE = 101;
@@ -50,7 +51,6 @@ public class DeliveryActivity extends AppCompatActivity {
                     .setApiKey("AIzaSyBzGU3NJV8-y5wDwmn3jOTw95e88HKxZeM")
                     .setApplicationId("1:853658382959:android:b6b6c6ce5c5caa928e139a")
                     .setProjectId("load-2420e")
-                    .setStorageBucket("load-2420e.firebasestorage.app")
                     .build();
             FirebaseApp.initializeApp(this, options);
         }
@@ -58,9 +58,12 @@ public class DeliveryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_delivery);
 
         db = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
-        String packageId = getIntent().getStringExtra("PACKAGE_ID");
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Saving Photo to Database...");
+        progressDialog.setCancelable(false);
+
+        String packageId = getIntent().getStringExtra("PACKAGE_ID");
         if (packageId == null) { finish(); return; }
 
         tvPackageId = findViewById(R.id.tvPackageId);
@@ -82,6 +85,19 @@ public class DeliveryActivity extends AppCompatActivity {
                 tvDropAddress.setText("Drop: " + currentPackage.getDropAddress());
                 tvWeight.setText("Weight: " + currentPackage.getWeightKg() + " kg");
                 tvOtpDisplay.setText("Secret OTP: " + currentPackage.getOtp());
+
+                // NEW: If there is already a photo saved, show it!
+                String savedPhoto = currentPackage.getDeliveryPhotoUrl() != null ?
+                        currentPackage.getDeliveryPhotoUrl() :
+                        currentPackage.getPickupPhotoUrl();
+
+                if (savedPhoto != null && !savedPhoto.isEmpty()) {
+                    Bitmap decodedImage = decodeBase64ToBitmap(savedPhoto);
+                    if (decodedImage != null) {
+                        ivProofPhoto.setImageBitmap(decodedImage);
+                        ivProofPhoto.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 if (currentPackage.getStatus().equals(Package.STATUS_DELIVERED)) {
                     btnCompleteDelivery.setEnabled(false);
@@ -148,39 +164,49 @@ public class DeliveryActivity extends AppCompatActivity {
                 if (photo != null) {
                     ivProofPhoto.setImageBitmap(photo);
                     ivProofPhoto.setVisibility(View.VISIBLE);
-                    uploadImageToFirebase(photo);
+                    saveImageToFirestore(photo);
                 }
             }
         }
     }
 
-    private void uploadImageToFirebase(Bitmap bitmap) {
+    private void saveImageToFirestore(Bitmap bitmap) {
         if (currentPackage == null) return;
 
-        Toast.makeText(this, "Uploading Photo...", Toast.LENGTH_SHORT).show();
+        progressDialog.show();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
         byte[] data = baos.toByteArray();
+        String base64Image = Base64.encodeToString(data, Base64.DEFAULT);
 
-        String path = "proofs/" + currentPackage.getPackageId() + "_" + System.currentTimeMillis() + ".jpg";
-        StorageReference ref = storage.getReference().child(path);
+        if (currentPackage.getStatus().equals(Package.STATUS_ASSIGNED)) {
+            currentPackage.setStatus(Package.STATUS_PICKED_UP);
+            currentPackage.setPickupPhotoUrl(base64Image);
+        } else {
+            currentPackage.setDeliveryPhotoUrl(base64Image);
+        }
 
-        ref.putBytes(data).addOnSuccessListener(taskSnapshot -> {
-            ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                String url = uri.toString();
-                if (currentPackage.getStatus().equals(Package.STATUS_ASSIGNED)) {
-                    currentPackage.setStatus(Package.STATUS_PICKED_UP);
-                    currentPackage.setPickupPhotoUrl(url);
-                } else {
-                    currentPackage.setDeliveryPhotoUrl(url);
-                }
-                db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage);
-                Toast.makeText(this, "Photo Uploaded & Status Updated!", Toast.LENGTH_SHORT).show();
-            });
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Upload Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        });
+        db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage)
+                .addOnCompleteListener(task -> {
+                    progressDialog.dismiss();
+                    if (task.isSuccessful()) {
+                        Toast.makeText(DeliveryActivity.this, "Photo Saved & Status Updated!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(DeliveryActivity.this, "Failed to save photo", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    // NEW METHOD: Decode Base64 back to Bitmap
+    private Bitmap decodeBase64ToBitmap(String base64Str) {
+        try {
+            byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void showOtpDialog() {
