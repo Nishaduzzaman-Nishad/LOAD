@@ -29,7 +29,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Manual Firebase Initialization
         if (FirebaseApp.getApps(this).isEmpty()) {
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setApiKey("AIzaSyBzGU3NJV8-y5wDwmn3jOTw95e88HKxZeM")
@@ -52,7 +51,8 @@ public class RegisterActivity extends AppCompatActivity {
         spinnerRole = findViewById(R.id.spinnerRole);
         btnRegister = findViewById(R.id.btnRegister);
 
-        String[] roles = {"ADMIN", "RIDER"};
+        // ADDED CUSTOMER AND P2P TO THE DROPDOWN
+        String[] roles = {"ADMIN", "RIDER", "CUSTOMER", "P2P"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, roles);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRole.setAdapter(adapter);
@@ -90,7 +90,6 @@ public class RegisterActivity extends AppCompatActivity {
                 user.put("phone", phone);
                 user.put("role", role);
 
-                // This line creates the "users" collection and the document automatically!
                 db.collection("users").document(userId).set(user).addOnCompleteListener(task1 -> {
                     if (task1.isSuccessful()) {
                         Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();

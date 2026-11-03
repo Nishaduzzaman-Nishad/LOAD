@@ -6,13 +6,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.load_app.R;
 import com.example.load_app.models.Package;
 import com.example.load_app.models.ValidationUtils;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Random;
 
@@ -21,13 +23,26 @@ public class CreatePackageActivity extends AppCompatActivity {
     private Spinner spinnerPriority;
     private Button btnSave;
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setApiKey("AIzaSyBzGU3NJV8-y5wDwmn3jOTw95e88HKxZeM")
+                    .setApplicationId("1:853658382959:android:b6b6c6ce5c5caa928e139a")
+                    .setProjectId("load-2420e")
+                    .build();
+            FirebaseApp.initializeApp(this, options);
+        }
+
         setContentView(R.layout.activity_create_package);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
         etPickup = findViewById(R.id.etPickup);
         etDrop = findViewById(R.id.etDrop);
         etPhone = findViewById(R.id.etPhone);
@@ -65,7 +80,15 @@ public class CreatePackageActivity extends AppCompatActivity {
 
         int randomNum = new Random().nextInt(900) + 100;
         String packageId = "P" + randomNum;
-        Package newPackage = new Package(packageId, pickup, drop, phone, weight, type, priority);
+
+        // GENERATE 4-DIGIT OTP
+        int otpNum = new Random().nextInt(9000) + 1000;
+        String generatedOtp = String.valueOf(otpNum);
+
+        String customerId = (mAuth.getCurrentUser() != null) ? mAuth.getCurrentUser().getUid() : "UNKNOWN";
+
+        Package newPackage = new Package(packageId, pickup, drop, phone, weight, type, priority, customerId);
+        newPackage.setOtp(generatedOtp);
 
         btnSave.setEnabled(false);
         db.collection("packages").document(packageId).set(newPackage)
@@ -73,7 +96,7 @@ public class CreatePackageActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         new AlertDialog.Builder(CreatePackageActivity.this)
                                 .setTitle("Success")
-                                .setMessage("Package has been added to the system!")
+                                .setMessage("Package Added!\nOTP for Delivery: " + generatedOtp)
                                 .setPositiveButton("OK", (dialog, which) -> finish())
                                 .setCancelable(false)
                                 .show();

@@ -15,12 +15,16 @@ public class Package {
     private String priority;
     private String status;
     private String assignedRiderId;
+    private String customerId;
+    private String otp;
+    private String pickupPhotoUrl;
+    private String deliveryPhotoUrl;
     private long createdAt;
 
     public Package() { }
 
     public Package(String packageId, String pickupAddress, String dropAddress,
-                   String receiverPhone, double weightKg, String packageType, String priority) {
+                   String receiverPhone, double weightKg, String packageType, String priority, String customerId) {
         this.packageId = packageId;
         this.pickupAddress = pickupAddress;
         this.dropAddress = dropAddress;
@@ -29,6 +33,7 @@ public class Package {
         this.packageType = packageType;
         this.priority = priority;
         this.status = STATUS_PENDING;
+        this.customerId = customerId;
         this.createdAt = System.currentTimeMillis();
     }
 
@@ -50,6 +55,14 @@ public class Package {
     public void setStatus(String status) { this.status = status; }
     public String getAssignedRiderId() { return assignedRiderId; }
     public void setAssignedRiderId(String assignedRiderId) { this.assignedRiderId = assignedRiderId; }
+    public String getCustomerId() { return customerId; }
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public String getOtp() { return otp; }
+    public void setOtp(String otp) { this.otp = otp; }
+    public String getPickupPhotoUrl() { return pickupPhotoUrl; }
+    public void setPickupPhotoUrl(String pickupPhotoUrl) { this.pickupPhotoUrl = pickupPhotoUrl; }
+    public String getDeliveryPhotoUrl() { return deliveryPhotoUrl; }
+    public void setDeliveryPhotoUrl(String deliveryPhotoUrl) { this.deliveryPhotoUrl = deliveryPhotoUrl; }
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
 }

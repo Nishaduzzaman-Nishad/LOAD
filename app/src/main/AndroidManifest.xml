@@ -29,6 +29,10 @@
         <activity android:name=".activities.CreatePackageActivity" android:exported="false" />
         <activity android:name=".activities.RiderDashboardActivity" android:exported="false" />
         <activity android:name=".activities.DeliveryActivity" android:exported="false" />
+
+        <!-- CUSTOMER DASHBOARD ADDED HERE -->
+        <activity android:name=".activities.CustomerDashboardActivity" android:exported="false" />
+
         <activity android:name=".MainActivity" android:exported="false" />
 
         <service android:name=".services.ShiftService" />
