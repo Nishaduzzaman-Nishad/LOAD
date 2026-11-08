@@ -1,11 +1,14 @@
 package com.example.load_app.activities;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -83,6 +86,34 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
         recyclerViewPackages = findViewById(R.id.recyclerViewPackages);
         listViewRiders = findViewById(R.id.listViewRiders);
         btnCreatePackage = findViewById(R.id.btnCreatePackage);
+
+        Button btnTestProvider = findViewById(R.id.btnTestProvider);
+        btnTestProvider.setOnClickListener(v -> {
+            // This simulates an EXTERNAL app querying your provider
+            ContentResolver resolver = getContentResolver();
+            Uri uri = Uri.parse("content://com.example.load_app.provider/packages");
+
+            // Query the provider
+            Cursor cursor = resolver.query(uri, null, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                StringBuilder result = new StringBuilder("External App Queried:\n");
+                do {
+                    String pkgId = cursor.getString(cursor.getColumnIndexOrThrow("package_id"));
+                    String status = cursor.getString(cursor.getColumnIndexOrThrow("status"));
+                    String priority = cursor.getString(cursor.getColumnIndexOrThrow("priority"));
+                    result.append(pkgId).append(" [").append(priority).append("] : ").append(status).append("\n");
+                } while (cursor.moveToNext());
+
+                cursor.close();
+
+                // Show the results in a Toast
+                Toast.makeText(this, result.toString(), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "No data found in provider", Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         int currentNightMode = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
         switchTheme.setChecked(currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES);

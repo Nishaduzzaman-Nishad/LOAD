@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/background">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Track Package"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary" />
+
+    <TextView
+        android:id="@+id/tvTrackPkgId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PKG-001"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/textSecondary" />
+
+    <!-- Visual Timeline -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="32dp"
+        android:paddingStart="16dp">
+
+        <TextView
+            android:id="@+id/stepPlaced"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="● Order Placed"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="40dp"
+            android:background="@color/textSecondary"
+            android:layout_marginStart="8dp" />
+
+        <TextView
+            android:id="@+id/stepAssigned"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="○ Rider Assigned"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="40dp"
+            android:background="@color/textSecondary"
+            android:layout_marginStart="8dp" />
+
+        <TextView
+            android:id="@+id/stepPickedUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="○ Picked Up"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="40dp"
+            android:background="@color/textSecondary"
+            android:layout_marginStart="8dp" />
+
+        <TextView
+            android:id="@+id/stepDelivered"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="○ Delivered"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

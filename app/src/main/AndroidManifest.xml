@@ -8,6 +8,7 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -33,8 +34,17 @@
         <activity android:name=".activities.CustomerDashboardActivity" android:exported="false" />
         <activity android:name=".activities.P2PDashboardActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".activities.TrackPackageActivity" />
 
-        <service android:name=".services.ShiftService" />
+        <provider
+            android:name=".utils.PackageProvider"
+            android:authorities="com.example.load_app.provider"
+            android:exported="true" />
+
+        <service
+            android:name=".services.ShiftService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
     </application>
 </manifest>

@@ -72,15 +72,27 @@
                 android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- NEW: Contacts Provider Button -->
+        <Button
+            android:id="@+id/btnPickContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pick Phone from Contacts"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="4dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tilPhone" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="Weight (kg)"
-            app:layout_constraintTop_toBottomOf="@id/tilPhone">
+            app:layout_constraintTop_toBottomOf="@id/btnPickContact">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etWeight"
                 android:layout_width="match_parent"

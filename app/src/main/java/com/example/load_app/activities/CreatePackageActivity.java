@@ -1,6 +1,10 @@
 package com.example.load_app.activities;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +25,7 @@ import java.util.Random;
 public class CreatePackageActivity extends AppCompatActivity {
     private EditText etPickup, etDrop, etPhone, etWeight, etType;
     private Spinner spinnerPriority;
-    private Button btnSave;
+    private Button btnSave, btnPickContact;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -50,13 +54,38 @@ public class CreatePackageActivity extends AppCompatActivity {
         etType = findViewById(R.id.etType);
         spinnerPriority = findViewById(R.id.spinnerPriority);
         btnSave = findViewById(R.id.btnSave);
+        btnPickContact = findViewById(R.id.btnPickContact);
 
         String[] priorities = {"NORMAL", "URGENT"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, priorities);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerPriority.setAdapter(adapter);
 
+        // Trigger System Content Provider for Contacts
+        btnPickContact.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+            startActivityForResult(intent, 1001);
+        });
+
         btnSave.setOnClickListener(v -> savePackage());
+    }
+
+    // Handle the result from the System Content Provider
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+            Uri contactUri = data.getData();
+            String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
+            // Query the provider
+            Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(numberIndex);
+                etPhone.setText(number);
+                cursor.close();
+            }
+        }
     }
 
     private void savePackage() {

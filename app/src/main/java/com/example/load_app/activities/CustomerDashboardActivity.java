@@ -59,8 +59,12 @@ public class CustomerDashboardActivity extends AppCompatActivity {
         });
 
         customerPackages = new ArrayList<>();
-        // Passing "CUSTOMER" as the userRole
-        adapter = new PackageAdapter(customerPackages, null, "CUSTOMER");
+        adapter = new PackageAdapter(customerPackages, pkg -> {
+            android.content.Intent intent = new android.content.Intent(CustomerDashboardActivity.this, TrackPackageActivity.class);
+            intent.putExtra("PKG_ID", pkg.getPackageId());
+            intent.putExtra("STATUS", pkg.getStatus());
+            startActivity(intent);
+        }, "CUSTOMER");
         rvCustomerPackages.setLayoutManager(new LinearLayoutManager(this));
         rvCustomerPackages.setAdapter(adapter);
 

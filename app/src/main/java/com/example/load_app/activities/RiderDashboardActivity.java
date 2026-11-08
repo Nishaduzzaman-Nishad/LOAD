@@ -16,17 +16,27 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.load_app.R;
 import com.example.load_app.adapters.PackageAdapter;
 import com.example.load_app.models.Package;
 import com.example.load_app.services.ShiftService;
+import com.example.load_app.utils.PriorityQueueAlgorithm;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class RiderDashboardActivity extends AppCompatActivity {
     private RecyclerView rvRiderPackages;
@@ -63,6 +73,9 @@ public class RiderDashboardActivity extends AppCompatActivity {
         tvLogout = findViewById(R.id.tvLogout);
         switchTheme = findViewById(R.id.switchTheme);
 
+        // Fetch Weather
+        fetchWeather();
+
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         switchTheme.setChecked(currentNightMode == Configuration.UI_MODE_NIGHT_YES);
         switchTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -80,7 +93,6 @@ public class RiderDashboardActivity extends AppCompatActivity {
         });
 
         riderPackages = new ArrayList<>();
-        // Passing "RIDER" as the userRole
         adapter = new PackageAdapter(riderPackages, null, "RIDER");
         adapter.setOnPackageClickListener(pkg -> {
             Intent intent = new Intent(RiderDashboardActivity.this, DeliveryActivity.class);
@@ -101,6 +113,8 @@ public class RiderDashboardActivity extends AppCompatActivity {
             Intent serviceIntent = new Intent(this, ShiftService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
             }
             Toast.makeText(this, "Shift Started! You are online.", Toast.LENGTH_SHORT).show();
         });
@@ -125,16 +139,25 @@ public class RiderDashboardActivity extends AppCompatActivity {
                     riderPackages.clear();
                     int assigned = 0, pickedUp = 0;
 
+                    // 1. Create the Priority Queue (Min-Heap)
+                    PriorityQueue<Package> sortedQueue = PriorityQueueAlgorithm.createDeliveryQueue();
+
                     for (DocumentSnapshot doc : value.getDocuments()) {
                         Package p = doc.toObject(Package.class);
                         if (p != null && myName.equals(p.getAssignedRiderId())) {
                             if (p.getStatus().equals(Package.STATUS_ASSIGNED) || p.getStatus().equals(Package.STATUS_PICKED_UP)) {
-                                riderPackages.add(p);
+                                sortedQueue.add(p); // Add to Min-Heap
                                 if (p.getStatus().equals(Package.STATUS_ASSIGNED)) assigned++;
                                 if (p.getStatus().equals(Package.STATUS_PICKED_UP)) pickedUp++;
                             }
                         }
                     }
+
+                    // 2. Extract from queue (Urgent packages pop out first, then oldest)
+                    while(!sortedQueue.isEmpty()){
+                        riderPackages.add(sortedQueue.poll());
+                    }
+
                     tvRiderStats.setText("Assigned: " + assigned + " | Picked Up: " + pickedUp);
                     tvEmptyState.setVisibility(riderPackages.isEmpty() ? View.VISIBLE : View.GONE);
                     rvRiderPackages.setVisibility(riderPackages.isEmpty() ? View.GONE : View.VISIBLE);
@@ -142,5 +165,35 @@ public class RiderDashboardActivity extends AppCompatActivity {
                 }
             });
         });
+    }
+
+    // HTTP Request & JSON Parsing for Weather API
+    private void fetchWeather() {
+        String url = "https://api.open-meteo.com/v1/forecast?latitude=23.8103&longitude=90.4125&current_weather=true";
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONObject currentWeather = response.getJSONObject("current_weather");
+                        double temp = currentWeather.getDouble("temperature");
+                        double wind = currentWeather.getDouble("windspeed");
+
+                        TextView tvWeather = findViewById(R.id.tvWeatherStatus);
+                        tvWeather.setText("Weather: " + temp + "°C | Wind: " + wind + " km/h");
+
+                        if (wind > 15.0) {
+                            tvWeather.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                            tvWeather.append(" ⚠️ High Wind!");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    TextView tvWeather = findViewById(R.id.tvWeatherStatus);
+                    tvWeather.setText("Weather data unavailable");
+                });
+        queue.add(request);
     }
 }
