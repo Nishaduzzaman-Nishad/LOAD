@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#0B2D4A</color>
-    <color name="primaryDark">#071F33</color>
-    <color name="accent">#FFC107</color>
+    <!-- Brand Colors -->
+    <color name="primary">#0B2D4A</color> <!-- Deep Navy -->
+    <color name="primaryDark">#061A2B</color>
+    <color name="accent">#FFC107</color> <!-- Bright Yellow -->
+
+    <!-- Backgrounds -->
+    <color name="background">#F5F7FA</color> <!-- Light Gray/White -->
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="successGreen">#16A36A</color>
+    <color name="warningOrange">#F59E0B</color>
+    <color name="errorRed">#DC3545</color>
+
+    <!-- Text -->
+    <color name="textPrimary">#172B3A</color> <!-- Dark Navy/Black -->
+    <color name="textSecondary">#6B7280</color>
     <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="background">#121212</color>
-    <color name="textPrimary">#E0E0E0</color>
-    <color name="textSecondary">#9E9E9E</color>
-    <color name="errorRed">#EF4444</color>
-    <color name="successGreen">#4CAF50</color>
 </resources>

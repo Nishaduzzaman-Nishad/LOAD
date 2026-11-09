@@ -73,6 +73,17 @@ public class RiderDashboardActivity extends AppCompatActivity {
         tvLogout = findViewById(R.id.tvLogout);
         switchTheme = findViewById(R.id.switchTheme);
 
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_profile) {
+                // Trigger existing logout logic
+                tvLogout.performClick();
+                return true;
+            }
+            // Other buttons just stay on this screen for the demo
+            return true;
+        });
+
         // Fetch Weather
         fetchWeather();
 
@@ -158,7 +169,7 @@ public class RiderDashboardActivity extends AppCompatActivity {
                         riderPackages.add(sortedQueue.poll());
                     }
 
-                    tvRiderStats.setText("Assigned: " + assigned + " | Picked Up: " + pickedUp);
+                    tvRiderStats.setText(String.valueOf(assigned));
                     tvEmptyState.setVisibility(riderPackages.isEmpty() ? View.VISIBLE : View.GONE);
                     rvRiderPackages.setVisibility(riderPackages.isEmpty() ? View.GONE : View.VISIBLE);
                     adapter.notifyDataSetChanged();

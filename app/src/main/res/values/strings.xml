@@ -1,3 +1,5 @@
-<resources>
-    <string name="app_name">LOAD</string>
-</resources>
+
+    <resources>
+        <string name="app_name">LOAD</string>
+        <string name="default_web_client_id">853658382959-7euf2pvg2vn5rohtddq8hohif0lvhlga.apps.googleusercontent.com</string>
+    </resources>

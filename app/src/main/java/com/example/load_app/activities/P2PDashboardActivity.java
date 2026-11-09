@@ -28,8 +28,6 @@ public class P2PDashboardActivity extends AppCompatActivity {
     private List<Package> p2pPackages;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-
-    // Our mock city map
     private Map<String, List<DijkstraAlgorithm.Edge>> cityGraph;
 
     @Override
@@ -49,7 +47,7 @@ public class P2PDashboardActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        cityGraph = DijkstraAlgorithm.buildDhakaGraph(); // Initialize graph
+        cityGraph = DijkstraAlgorithm.buildDhakaGraph();
 
         rvP2PPackages = findViewById(R.id.rvP2PPackages);
         TextView tvLogout = findViewById(R.id.tvLogout);
@@ -61,8 +59,6 @@ public class P2PDashboardActivity extends AppCompatActivity {
         });
 
         p2pPackages = new ArrayList<>();
-
-        // Modified click listener to use Dijkstra
         adapter = new PackageAdapter(p2pPackages, pkg -> {
             showDijkstraRouteDialog(pkg);
         }, "P2P");
@@ -74,12 +70,10 @@ public class P2PDashboardActivity extends AppCompatActivity {
     }
 
     private void showDijkstraRouteDialog(Package pkg) {
-        // Parse addresses to match our graph nodes
         String pickupNode = extractNode(pkg.getPickupAddress());
         String dropNode = extractNode(pkg.getDropAddress());
 
         if (pickupNode == null || dropNode == null) {
-            // If addresses don't match our known zones, fallback to direct assignment
             new AlertDialog.Builder(this)
                     .setTitle("Accept Delivery?")
                     .setMessage("Route calculation unavailable for this area. Accept anyway?")
@@ -89,7 +83,6 @@ public class P2PDashboardActivity extends AppCompatActivity {
             return;
         }
 
-        // Run Dijkstra
         String routeInfo = DijkstraAlgorithm.getShortestPath(cityGraph, pickupNode, dropNode);
 
         new AlertDialog.Builder(this)
@@ -111,7 +104,6 @@ public class P2PDashboardActivity extends AppCompatActivity {
         });
     }
 
-    // Helper to find a city zone in the address string
     private String extractNode(String address) {
         if (address == null) return null;
         String lower = address.toLowerCase(Locale.ROOT);

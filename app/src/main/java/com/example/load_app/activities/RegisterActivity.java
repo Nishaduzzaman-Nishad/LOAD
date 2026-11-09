@@ -2,6 +2,7 @@ package com.example.load_app.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,7 +52,6 @@ public class RegisterActivity extends AppCompatActivity {
         spinnerRole = findViewById(R.id.spinnerRole);
         btnRegister = findViewById(R.id.btnRegister);
 
-        // ADDED CUSTOMER AND P2P TO THE DROPDOWN
         String[] roles = {"ADMIN", "RIDER", "CUSTOMER", "P2P"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, roles);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -62,32 +62,55 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void handleRegister() {
         String fullName = etFullName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
+        String emailInput = etEmail.getText().toString().trim();
+        String phoneInput = etPhone.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
         String role = spinnerRole.getSelectedItem().toString();
 
         if (fullName.isEmpty()) { etFullName.setError("Required"); return; }
-        String emailError = ValidationUtils.getEmailError(email);
-        if (emailError != null) { etEmail.setError(emailError); return; }
-        String phoneError = ValidationUtils.getPhoneError(phone);
-        if (phoneError != null) { etPhone.setError(phoneError); return; }
+
+        // 1. Sanitize the Phone field (allows +880, 880, dashes)
+        String sanitizedPhone = sanitizePhoneNumber(phoneInput);
+        if (sanitizedPhone == null) {
+            etPhone.setError("Invalid BD Phone Number");
+            return;
+        }
+
+        // 2. Handle Email/Phone logic for Firebase Auth
+        String firebaseEmail = emailInput;
+        if (!emailInput.contains("@")) {
+            // If they typed a phone number in the email field, sanitize it
+            String cleanPhoneEmail = sanitizePhoneNumber(emailInput);
+            if (cleanPhoneEmail == null) {
+                etEmail.setError("Invalid Email or Phone");
+                return;
+            }
+            firebaseEmail = cleanPhoneEmail + "@load-app.com";
+        } else {
+            // Standard Email Validation
+            if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
+                etEmail.setError("Invalid Email format");
+                return;
+            }
+        }
+
+        // 3. Password Validation
         String passwordError = ValidationUtils.getPasswordError(password);
         if (passwordError != null) { etPassword.setError(passwordError); return; }
         if (!password.equals(confirmPassword)) { etConfirmPassword.setError("Mismatch"); return; }
 
         btnRegister.setEnabled(false);
 
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
+        mAuth.createUserWithEmailAndPassword(firebaseEmail, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 String userId = mAuth.getCurrentUser().getUid();
 
                 Map<String, Object> user = new HashMap<>();
                 user.put("userId", userId);
                 user.put("fullName", fullName);
-                user.put("email", email);
-                user.put("phone", phone);
+                user.put("email", emailInput); // Store what they originally typed
+                user.put("phone", sanitizedPhone); // Store the clean phone
                 user.put("role", role);
 
                 db.collection("users").document(userId).set(user).addOnCompleteListener(task1 -> {
@@ -105,5 +128,20 @@ public class RegisterActivity extends AppCompatActivity {
                 btnRegister.setEnabled(true);
             }
         });
+    }
+
+    // Helper to clean +880, dashes, and spaces
+    private String sanitizePhoneNumber(String phone) {
+        if (phone == null) return null;
+        String digits = phone.replaceAll("[^0-9]", "");
+        if (digits.startsWith("880") && digits.length() == 13) {
+            digits = "0" + digits.substring(3);
+        } else if (digits.startsWith("88") && digits.length() == 12) {
+            digits = "0" + digits.substring(2);
+        }
+        if (digits.startsWith("01") && digits.length() == 11) {
+            return digits;
+        }
+        return null;
     }
 }

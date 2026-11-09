@@ -4,11 +4,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -25,6 +27,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".activities.WelcomeActivity" android:exported="false" />
         <activity android:name=".activities.LoginActivity" android:exported="false" />
         <activity android:name=".activities.RegisterActivity" android:exported="false" />
         <activity android:name=".activities.AdminDashboardActivity" android:exported="false" />
@@ -33,14 +36,16 @@
         <activity android:name=".activities.DeliveryActivity" android:exported="false" />
         <activity android:name=".activities.CustomerDashboardActivity" android:exported="false" />
         <activity android:name=".activities.P2PDashboardActivity" android:exported="false" />
+        <activity android:name=".activities.TrackPackageActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".activities.TrackPackageActivity" />
 
+        <!-- Custom Content Provider -->
         <provider
             android:name=".utils.PackageProvider"
             android:authorities="com.example.load_app.provider"
             android:exported="true" />
 
+        <!-- Foreground Service -->
         <service
             android:name=".services.ShiftService"
             android:exported="false"

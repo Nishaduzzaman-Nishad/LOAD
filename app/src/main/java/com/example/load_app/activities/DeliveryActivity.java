@@ -29,7 +29,14 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.osmdroid.config.Configuration;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polyline;
+
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 public class DeliveryActivity extends AppCompatActivity {
     private TextView tvPackageId, tvPickupAddress, tvDropAddress, tvWeight, tvOtpDisplay;
@@ -38,6 +45,7 @@ public class DeliveryActivity extends AppCompatActivity {
     private Package currentPackage;
     private FirebaseFirestore db;
     private ProgressDialog progressDialog;
+    private MapView map;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int CAMERA_REQUEST_CODE = 101;
@@ -76,6 +84,10 @@ public class DeliveryActivity extends AppCompatActivity {
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
         btnCompleteDelivery = findViewById(R.id.btnCompleteDelivery);
         ivProofPhoto = findViewById(R.id.ivProofPhoto);
+        map = findViewById(R.id.map);
+
+        // Initialize Map config early
+        Configuration.getInstance().load(getApplicationContext(), androidx.preference.PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
 
         db.collection("packages").document(packageId).get().addOnSuccessListener(doc -> {
             currentPackage = doc.toObject(Package.class);
@@ -86,7 +98,6 @@ public class DeliveryActivity extends AppCompatActivity {
                 tvWeight.setText("Weight: " + currentPackage.getWeightKg() + " kg");
                 tvOtpDisplay.setText("Secret OTP: " + currentPackage.getOtp());
 
-                // NEW: If there is already a photo saved, show it!
                 String savedPhoto = currentPackage.getDeliveryPhotoUrl() != null ?
                         currentPackage.getDeliveryPhotoUrl() :
                         currentPackage.getPickupPhotoUrl();
@@ -103,9 +114,13 @@ public class DeliveryActivity extends AppCompatActivity {
                     btnCompleteDelivery.setEnabled(false);
                     btnTakePhoto.setEnabled(false);
                 }
+
+                // Draw the route on the map
+                setupMap(currentPackage.getPickupAddress(), currentPackage.getDropAddress());
             }
         });
 
+        // Fallback to external Google Maps
         btnNavigate.setOnClickListener(v -> {
             if (currentPackage != null) {
                 Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(currentPackage.getDropAddress()));
@@ -132,6 +147,56 @@ public class DeliveryActivity extends AppCompatActivity {
         });
 
         btnCompleteDelivery.setOnClickListener(v -> showOtpDialog());
+    }
+
+    private void setupMap(String pickup, String drop) {
+        map.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+        map.setMultiTouchControls(true);
+
+        GeoPoint startPoint = getZoneCoordinates(pickup);
+        GeoPoint endPoint = getZoneCoordinates(drop);
+
+        if (startPoint != null && endPoint != null) {
+            map.getController().setZoom(11.5);
+            map.getController().setCenter(new GeoPoint((startPoint.getLatitude() + endPoint.getLatitude()) / 2,
+                    (startPoint.getLongitude() + endPoint.getLongitude()) / 2));
+
+            Marker startMarker = new Marker(map);
+            startMarker.setPosition(startPoint);
+            startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            startMarker.setTitle("Pickup: " + pickup);
+            map.getOverlays().add(startMarker);
+
+            Marker endMarker = new Marker(map);
+            endMarker.setPosition(endPoint);
+            endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            endMarker.setTitle("Drop: " + drop);
+            map.getOverlays().add(endMarker);
+
+            Polyline line = new Polyline();
+            ArrayList<GeoPoint> points = new ArrayList<>();
+            points.add(startPoint);
+            points.add(new GeoPoint(23.7500, 90.3900)); // Farmgate center as detour
+            points.add(endPoint);
+
+            line.setPoints(points);
+            line.setColor(android.graphics.Color.parseColor("#FFC107")); // Yellow Dijkstra Line
+            line.setWidth(10f);
+            map.getOverlays().add(line);
+        }
+        map.invalidate(); // Refresh map drawing
+    }
+
+    private GeoPoint getZoneCoordinates(String address) {
+        if (address == null) return null;
+        String lower = address.toLowerCase();
+        if (lower.contains("uttara")) return new GeoPoint(23.8759, 90.3795);
+        if (lower.contains("mirpur")) return new GeoPoint(23.8069, 90.3687);
+        if (lower.contains("gulshan")) return new GeoPoint(23.7925, 90.4078);
+        if (lower.contains("farmgate")) return new GeoPoint(23.7581, 90.3901);
+        if (lower.contains("dhanmondi")) return new GeoPoint(23.7465, 90.3760);
+        if (lower.contains("motijheel")) return new GeoPoint(23.7331, 90.4174);
+        return new GeoPoint(23.8103, 90.4125); // Default Dhaka center
     }
 
     private void openCamera() {
@@ -198,7 +263,6 @@ public class DeliveryActivity extends AppCompatActivity {
                 });
     }
 
-    // NEW METHOD: Decode Base64 back to Bitmap
     private Bitmap decodeBase64ToBitmap(String base64Str) {
         try {
             byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
@@ -232,5 +296,18 @@ public class DeliveryActivity extends AppCompatActivity {
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();
+    }
+
+    // OSMDROID LIFECYCLE OVERRIDES (Required to prevent crashes)
+    @Override
+    public void onResume() {
+        super.onResume();
+        map.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        map.onPause();
     }
 }

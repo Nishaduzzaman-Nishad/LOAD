@@ -1,12 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
     <style name="Theme.LOAD" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primaryDark</item>
         <item name="colorOnPrimary">@color/white</item>
+
         <item name="colorSecondary">@color/accent</item>
         <item name="colorSecondaryVariant">@color/accent</item>
-        <item name="colorOnSecondary">@color/primary</item> <!-- Navy text on Yellow buttons -->
+        <item name="colorOnSecondary">@color/primary</item>
+
         <item name="android:statusBarColor">@color/primary</item>
-        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

@@ -61,7 +61,6 @@ public class CreatePackageActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerPriority.setAdapter(adapter);
 
-        // Trigger System Content Provider for Contacts
         btnPickContact.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
             startActivityForResult(intent, 1001);
@@ -70,14 +69,12 @@ public class CreatePackageActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> savePackage());
     }
 
-    // Handle the result from the System Content Provider
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
             Uri contactUri = data.getData();
             String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
-            // Query the provider
             Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
@@ -109,11 +106,8 @@ public class CreatePackageActivity extends AppCompatActivity {
 
         int randomNum = new Random().nextInt(900) + 100;
         String packageId = "P" + randomNum;
-
-        // GENERATE 4-DIGIT OTP
         int otpNum = new Random().nextInt(9000) + 1000;
         String generatedOtp = String.valueOf(otpNum);
-
         String customerId = (mAuth.getCurrentUser() != null) ? mAuth.getCurrentUser().getUid() : "UNKNOWN";
 
         Package newPackage = new Package(packageId, pickup, drop, phone, weight, type, priority, customerId);

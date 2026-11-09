@@ -10,8 +10,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -42,7 +45,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
     private RecyclerView recyclerViewPackages;
     private ListView listViewRiders;
     private Switch switchTheme;
-    private Button btnCreatePackage;
+    private Button btnCreatePackage, btnTestProvider;
     private PackageAdapter adapter;
     private List<Package> packageList;
     private ActivityResultLauncher<Intent> createPackageLauncher;
@@ -55,8 +58,15 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-            tvNetworkStatus.setText(isConnected ? "Online" : "Offline");
-            tvNetworkStatus.setTextColor(getResources().getColor(isConnected ? R.color.successGreen : R.color.errorRed));
+
+            // Updated to match the new UI (dot and text)
+            if (isConnected) {
+                tvNetworkStatus.setText("● Online");
+                tvNetworkStatus.setTextColor(getResources().getColor(R.color.successGreen));
+            } else {
+                tvNetworkStatus.setText("● Offline");
+                tvNetworkStatus.setTextColor(getResources().getColor(R.color.errorRed));
+            }
         }
     };
 
@@ -86,14 +96,12 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
         recyclerViewPackages = findViewById(R.id.recyclerViewPackages);
         listViewRiders = findViewById(R.id.listViewRiders);
         btnCreatePackage = findViewById(R.id.btnCreatePackage);
+        btnTestProvider = findViewById(R.id.btnTestProvider);
 
-        Button btnTestProvider = findViewById(R.id.btnTestProvider);
+        // Content Provider Test Button
         btnTestProvider.setOnClickListener(v -> {
-            // This simulates an EXTERNAL app querying your provider
             ContentResolver resolver = getContentResolver();
             Uri uri = Uri.parse("content://com.example.load_app.provider/packages");
-
-            // Query the provider
             Cursor cursor = resolver.query(uri, null, null, null, null);
 
             if (cursor != null && cursor.moveToFirst()) {
@@ -104,17 +112,14 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
                     String priority = cursor.getString(cursor.getColumnIndexOrThrow("priority"));
                     result.append(pkgId).append(" [").append(priority).append("] : ").append(status).append("\n");
                 } while (cursor.moveToNext());
-
                 cursor.close();
-
-                // Show the results in a Toast
                 Toast.makeText(this, result.toString(), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "No data found in provider", Toast.LENGTH_SHORT).show();
             }
         });
 
-
+        // Theme Toggle Logic
         int currentNightMode = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
         switchTheme.setChecked(currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES);
         switchTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -132,7 +137,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
         });
 
         packageList = new ArrayList<>();
-        // Passing "ADMIN" as the userRole
         adapter = new PackageAdapter(packageList, this, "ADMIN");
         recyclerViewPackages.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPackages.setAdapter(adapter);
@@ -163,6 +167,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
             }
             ArrayAdapter<String> riderAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, riderNames);
             listViewRiders.setAdapter(riderAdapter);
+            setListViewHeightBasedOnChildren(listViewRiders);
         });
     }
 
@@ -206,7 +211,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
             final double capacity = 20.0;
 
             new AlertDialog.Builder(this)
-                    .setTitle("Select Rider")
+                    .setTitle("Select Rider (Knapsack Optimization)")
                     .setItems(ridersArray, (dialog, which) -> {
                         String riderName = ridersArray[which];
                         List<Package> pendingPackages = new ArrayList<>();
@@ -214,6 +219,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
                             if (p.getStatus().equals(Package.STATUS_PENDING)) pendingPackages.add(p);
                         }
 
+                        // Run Knapsack Algorithm
                         List<Package> optimalPackages = KnapsackAlgorithm.getOptimalPackages(pendingPackages, capacity);
 
                         if (optimalPackages.contains(selectedPackage)) {
@@ -227,7 +233,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
                                         }
                                     });
                         } else {
-                            Toast.makeText(this, "Cannot assign! Capacity exceeded.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Cannot assign! Rider capacity (20kg) exceeded.", Toast.LENGTH_LONG).show();
                         }
                     }).show();
         });
@@ -243,5 +249,22 @@ public class AdminDashboardActivity extends AppCompatActivity implements Package
     protected void onStop() {
         super.onStop();
         unregisterReceiver(networkReceiver);
+    }
+
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) return;
+
+        int totalHeight = 0;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(0, 0);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 }
