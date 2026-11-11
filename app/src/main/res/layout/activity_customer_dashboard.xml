@@ -5,104 +5,216 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- Header -->
-    <TextView
-        android:id="@+id/tvCustomerHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello there!"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvLogout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Logout"
-        android:textColor="@color/errorRed"
-        android:textStyle="bold"
-        android:textSize="14sp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvCustomerHeader" />
-
-    <!-- Hero Banner Card (Yellow Accent) -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/heroBanner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        app:cardBackgroundColor="@color/accent"
-        app:layout_constraintTop_toBottomOf="@id/tvCustomerHeader">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Fast Delivery"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="At Your Doorstep"
-                android:textSize="14sp"
-                android:textColor="@color/primary"
-                android:layout_marginTop="4dp" />
-
-            <Button
-                android:id="@+id/btnCreateRequest"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Order Now →"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:backgroundTint="@color/primary"
-                android:layout_marginTop="16dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                app:cornerRadius="12dp" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- List Header -->
-    <TextView
-        android:id="@+id/tvMyOrdersLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="My Packages:"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:textColor="@color/primary"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/heroBanner" />
-
-    <!-- List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCustomerPackages"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshCustomer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvMyOrdersLabel" />
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        app:layout_constraintTop_toTopOf="parent">
 
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:paddingBottom="24dp">
+
+                <!-- Header Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_truck"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="LOAD"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:layout_marginStart="8dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchCustomerTheme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dark"
+                        android:textColor="@color/textPrimary" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvCustomerWelcome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Hello there!"
+                    android:textSize="16sp"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginTop="16dp" />
+
+                <!-- Hero Banner -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/accent">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Fast Delivery"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/textOnAccent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="At Your Doorstep"
+                            android:textSize="14sp"
+                            android:textColor="@color/textOnAccent"
+                            android:layout_marginTop="4dp" />
+
+                        <Button
+                            android:id="@+id/btnCreateRequest"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:text="Order Now →"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:backgroundTint="@color/primary"
+                            android:layout_marginTop="16dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            app:cornerRadius="12dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- NEW: Customer Stats Grid -->
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:columnCount="2"
+                    android:rowCount="1">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_marginEnd="4dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="@color/surface"
+                        app:cardElevation="2dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Orders" android:textSize="12sp" android:textColor="@color/textSecondary" />
+                            <TextView android:id="@+id/tvCustTotalOrders" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/primary" android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_marginStart="4dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="@color/surface"
+                        app:cardElevation="2dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Spent" android:textSize="12sp" android:textColor="@color/textSecondary" />
+                            <TextView android:id="@+id/tvCustTotalSpent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="৳0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/successGreen" android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </GridLayout>
+
+                <!-- Search Bar -->
+                <EditText
+                    android:id="@+id/etCustomerSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/badge_bg"
+                    android:hint="🔍 Search by Package ID..."
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textColor="@color/textPrimary"
+                    android:textColorHint="@color/textSecondary" />
+
+                <TextView
+                    android:id="@+id/tvListLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My Packages"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/primary"
+                    android:layout_marginTop="16dp" />
+
+                <!-- Empty State -->
+                <LinearLayout
+                    android:id="@+id/llCustomerEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:layout_marginTop="32dp">
+                    <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_box"
+                        app:tint="@color/textSecondary"
+                        android:alpha="0.5" />
+                    <TextView
+                        android:id="@+id/tvEmptyText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No packages found."
+                        android:gravity="center"
+                        android:textColor="@color/textSecondary"
+                        android:layout_marginTop="16dp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCustomerPackages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/primary"
+        app:itemTextColor="@color/primary"
+        app:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

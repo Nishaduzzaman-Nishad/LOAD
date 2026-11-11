@@ -20,6 +20,7 @@ public class ValidationUtils {
         return PHONE_PATTERN.matcher(phone.trim()).matches();
     }
 
+
     public static boolean isValidPassword(String password) {
         return password != null && password.length() >= 6;
     }

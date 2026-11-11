@@ -11,15 +11,18 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- Phase Banner -->
         <TextView
-            android:id="@+id/tvDeliveryTitle"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvPhaseStatus"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Delivery Details"
-            android:textSize="24sp"
+            android:text="PHASE 1: ARRIVED AT PICKUP"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/primary"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/white"
+            android:background="@color/primary"
+            android:padding="16dp"
+            android:gravity="center"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Details Card -->
@@ -31,7 +34,7 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/surface"
-            app:layout_constraintTop_toBottomOf="@id/tvDeliveryTitle">
+            app:layout_constraintTop_toBottomOf="@id/tvPhaseStatus">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -49,14 +52,14 @@
                     android:textColor="@color/primary" />
 
                 <TextView
-                    android:id="@+id/tvOtpDisplay"
+                    android:id="@+id/tvSenderInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Secret OTP: 1234"
-                    android:textSize="16sp"
+                    android:text="Sender: Name (Phone)"
+                    android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="@color/warningOrange"
-                    android:layout_marginTop="4dp" />
+                    android:textColor="@color/successGreen"
+                    android:layout_marginTop="8dp" />
 
                 <TextView
                     android:id="@+id/tvPickupAddress"
@@ -64,7 +67,22 @@
                     android:layout_height="wrap_content"
                     android:text="Pickup: Dhanmondi"
                     android:textSize="14sp"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="4dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/textSecondary"
+                    android:layout_marginVertical="12dp" />
+
+                <TextView
+                    android:id="@+id/tvReceiverInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Receiver: Phone"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/warningOrange" />
 
                 <TextView
                     android:id="@+id/tvDropAddress"
@@ -80,18 +98,9 @@
                     android:layout_height="wrap_content"
                     android:text="Weight: 5kg"
                     android:textSize="14sp"
-                    android:layout_marginTop="4dp" />
+                    android:layout_marginTop="16dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- IN-APP MAP (osmdroid) -->
-        <org.osmdroid.views.MapView
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_marginTop="16dp"
-            android:background="@color/surface"
-            app:layout_constraintTop_toBottomOf="@id/cardDetails" />
 
         <!-- Action Buttons -->
         <LinearLayout
@@ -100,7 +109,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/map">
+            app:layout_constraintTop_toBottomOf="@id/cardDetails">
 
             <Button
                 android:id="@+id/btnNavigate"
@@ -108,7 +117,7 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="External Nav"
+                android:text="NAVIGATE"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/primary"
                 app:cornerRadius="12dp" />
@@ -119,16 +128,17 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Call Receiver"
+                android:text="CALL"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/successGreen"
                 app:cornerRadius="12dp" />
         </LinearLayout>
 
+        <!-- Proof Photo -->
         <ImageView
             android:id="@+id/ivProofPhoto"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="250dp"
             android:layout_marginTop="16dp"
             android:scaleType="centerCrop"
             android:visibility="gone"
@@ -140,8 +150,8 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="16dp"
-            android:text="Take Proof Photo"
-            android:textColor="@color/primary"
+            android:text="TAKE PROOF PHOTO"
+            android:textColor="@color/textOnAccent"
             android:backgroundTint="@color/accent"
             app:cornerRadius="12dp"
             app:layout_constraintTop_toBottomOf="@id/ivProofPhoto" />
@@ -151,11 +161,23 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="16dp"
-            android:text="Complete Delivery (OTP)"
+            android:text="VERIFY PICKUP OTP"
             android:textColor="@color/white"
-            android:backgroundTint="@color/successGreen"
+            android:backgroundTint="@color/primary"
             app:cornerRadius="12dp"
             app:layout_constraintTop_toBottomOf="@id/btnTakePhoto" />
+
+        <!-- Unassign Button -->
+        <Button
+            android:id="@+id/btnUnassign"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:text="Unassign Package (20% Penalty)"
+            android:textColor="@color/errorRed"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            app:layout_constraintTop_toBottomOf="@id/btnCompleteDelivery" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

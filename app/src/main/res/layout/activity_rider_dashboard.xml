@@ -5,182 +5,214 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <ScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/bottomNav"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:paddingBottom="80dp">
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-            <!-- Profile Header -->
-            <TextView
-                android:id="@+id/tvRiderHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hello, Rider!"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tvRiderSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Keep going, you're awesome!"
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
-                app:layout_constraintStart_toStartOf="@id/tvRiderHeader"
-                app:layout_constraintTop_toBottomOf="@id/tvRiderHeader" />
-
-            <!-- Logout and Theme Toggle -->
+            <!-- LinearLayout prevents the crazy overlapping -->
             <LinearLayout
-                android:id="@+id/topControls"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="end"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:padding="16dp"
+                android:paddingBottom="24dp">
 
-                <TextView
-                    android:id="@+id/tvLogout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Logout"
-                    android:textColor="@color/errorRed"
-                    android:textStyle="bold"
-                    android:textSize="14sp" />
-
-                <Switch
-                    android:id="@+id/switchTheme"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dark"
-                    android:textSize="10sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-
-            <!-- Stat Cards -->
-            <LinearLayout
-                android:id="@+id/statsRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="24dp"
-                app:layout_constraintTop_toBottomOf="@id/tvRiderSubtitle">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/surface">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Assigned" android:textSize="12sp" android:textColor="@color/textSecondary" />
-                        <TextView android:id="@+id/tvRiderStats" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="22sp" android:textStyle="bold" android:textColor="@color/primary" android:layout_marginTop="4dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/surface">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Weather" android:textSize="12sp" android:textColor="@color/textSecondary" />
-                        <TextView android:id="@+id/tvWeatherStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Fetching..." android:textSize="14sp" android:textStyle="bold" android:textColor="@color/successGreen" android:layout_marginTop="4dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- MAP PLACEHOLDER (Mimics the mockup) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/mapCard"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#E3F2FD"
-                app:layout_constraintTop_toBottomOf="@id/statsRow">
-                <ImageView
+                <!-- Header Row -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_map"
-                    android:alpha="0.3"
-                    android:scaleType="centerInside"
-                    app:tint="@color/primary" />
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_truck"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="LOAD"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:layout_marginStart="8dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchRiderTheme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dark"
+                        android:textColor="@color/textPrimary" />
+                </LinearLayout>
+
+                <!-- Welcome & On Duty -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvWelcomeMsg"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Hello, Rider!"
+                        android:textSize="16sp"
+                        android:textColor="@color/textSecondary" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchOnDuty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="On Duty"
+                        android:textColor="@color/successGreen"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Stats Grid -->
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:columnCount="3"
+                    android:rowCount="1">
+
+                    <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="match_parent" android:layout_columnWeight="1" android:layout_marginEnd="4dp" app:cardCornerRadius="12dp" app:cardBackgroundColor="@color/surface" app:cardElevation="2dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tasks" android:textSize="11sp" android:textColor="@color/textSecondary" />
+                            <TextView android:id="@+id/tvRiderStats" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/primary" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="match_parent" android:layout_columnWeight="1" android:layout_marginHorizontal="4dp" app:cardCornerRadius="12dp" app:cardBackgroundColor="@color/surface" app:cardElevation="2dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="8dp" android:gravity="center">
+                            <ProgressBar android:id="@+id/pbRiderScore" style="?android:attr/progressBarStyleHorizontal" android:layout_width="40dp" android:layout_height="40dp" android:progressDrawable="@drawable/circular_progress" android:max="100" android:progress="0" />
+                            <TextView android:id="@+id/tvRiderScore" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/successGreen" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView android:id="@+id/cardTotalIncome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_columnWeight="1" android:layout_marginStart="4dp" android:clickable="true" android:focusable="true" app:rippleColor="@color/accent" app:cardCornerRadius="12dp" app:cardBackgroundColor="@color/surface" app:cardElevation="2dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp" android:gravity="center">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Income ↗" android:textSize="11sp" android:textColor="@color/textSecondary" />
+                            <TextView android:id="@+id/tvTotalIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="৳0" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/successGreen" android:layout_marginTop="2dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </GridLayout>
+
+                <!-- Weather & Penalty Row -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="@color/primary"
+                    app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="12dp" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🌤" android:textSize="20sp" android:layout_marginEnd="8dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Weather: " android:textColor="@color/textSecondary" android:textSize="12sp" />
+                        <TextView android:id="@+id/tvWeatherStatus" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Fetching..." android:textColor="@color/white" android:textStyle="bold" android:textSize="14sp" />
+                        <TextView android:id="@+id/tvPenalty" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Penalty: ৳0" android:textColor="@color/errorRed" android:textStyle="bold" android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Search & Load Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/etSearch"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/badge_bg"
+                        android:hint="🔍 Search by ID..."
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textSecondary" />
+
+                    <TextView
+                        android:id="@+id/tvCurrentWeight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Load: 0.0 kg"
+                        android:layout_marginStart="12dp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary" />
+                </LinearLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Live Route Map"
-                    android:textColor="@color/primary"
+                    android:text="My Deliveries"
                     android:textStyle="bold"
-                    android:layout_gravity="center" />
-            </com.google.android.material.card.MaterialCardView>
+                    android:textSize="18sp"
+                    android:textColor="@color/primary"
+                    android:layout_marginTop="16dp" />
 
-            <!-- Go Online Button -->
-            <Button
-                android:id="@+id/btnGoOnline"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="16dp"
-                android:text="Go Online (Start Shift)"
-                android:textColor="@color/primary"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:backgroundTint="@color/accent"
-                app:cornerRadius="16dp"
-                app:layout_constraintTop_toBottomOf="@id/mapCard" />
+                <!-- Empty State -->
+                <LinearLayout
+                    android:id="@+id/llEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:layout_marginTop="32dp">
+                    <ImageView
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_box"
+                        app:tint="@color/textSecondary"
+                        android:alpha="0.5" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="All caught up!\nNo active deliveries."
+                        android:gravity="center"
+                        android:textColor="@color/textSecondary"
+                        android:layout_marginTop="16dp" />
+                </LinearLayout>
 
-            <!-- Deliveries List -->
-            <TextView
-                android:id="@+id/tvMyDeliveriesLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="My Deliveries"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="@color/primary"
-                android:layout_marginTop="24dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnGoOnline" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRiderPackages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvRiderPackages"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                app:layout_constraintTop_toBottomOf="@id/tvMyDeliveriesLabel" />
+                <!-- Support Button -->
+                <Button
+                    android:id="@+id/btnSupport"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Call Admin Support"
+                    android:textColor="@color/textSecondary"
+                    style="@style/Widget.MaterialComponents.Button.TextButton" />
 
-            <TextView
-                android:id="@+id/tvEmptyState"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No packages assigned yet."
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
-                android:visibility="gone"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rvRiderPackages" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
-
-    <!-- Bottom Navigation Bar (Mimics the mockup) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -191,5 +223,4 @@
         app:itemTextColor="@color/primary"
         app:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

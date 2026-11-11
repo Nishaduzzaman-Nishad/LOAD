@@ -21,6 +21,7 @@ public class Rider extends User {
         this.totalEarnings = 0.0;
     }
 
+
     public double getMaxCapacityKg() { return maxCapacityKg; }
     public void setMaxCapacityKg(double maxCapacityKg) { this.maxCapacityKg = maxCapacityKg; }
 

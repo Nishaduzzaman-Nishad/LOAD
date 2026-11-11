@@ -10,16 +10,27 @@ public class Package {
     private String pickupAddress;
     private String dropAddress;
     private String receiverPhone;
+    private String receiverName;
     private double weightKg;
     private String packageType;
     private String priority;
     private String status;
     private String assignedRiderId;
+
     private String customerId;
-    private String otp;
+    private String customerName;
+    private String customerPhone;
+
+    private String pickupOtp;
+    private String deliveryOtp;
+
     private String pickupPhotoUrl;
     private String deliveryPhotoUrl;
     private long createdAt;
+
+    private double customerPrice;
+    private double riderFee;
+    private double netProfit;
 
     public Package() { }
 
@@ -45,6 +56,8 @@ public class Package {
     public void setDropAddress(String dropAddress) { this.dropAddress = dropAddress; }
     public String getReceiverPhone() { return receiverPhone; }
     public void setReceiverPhone(String receiverPhone) { this.receiverPhone = receiverPhone; }
+    public String getReceiverName() { return receiverName; }
+    public void setReceiverName(String receiverName) { this.receiverName = receiverName; }
     public double getWeightKg() { return weightKg; }
     public void setWeightKg(double weightKg) { this.weightKg = weightKg; }
     public String getPackageType() { return packageType; }
@@ -57,12 +70,24 @@ public class Package {
     public void setAssignedRiderId(String assignedRiderId) { this.assignedRiderId = assignedRiderId; }
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
-    public String getOtp() { return otp; }
-    public void setOtp(String otp) { this.otp = otp; }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getCustomerPhone() { return customerPhone; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+    public String getPickupOtp() { return pickupOtp; }
+    public void setPickupOtp(String pickupOtp) { this.pickupOtp = pickupOtp; }
+    public String getDeliveryOtp() { return deliveryOtp; }
+    public void setDeliveryOtp(String deliveryOtp) { this.deliveryOtp = deliveryOtp; }
     public String getPickupPhotoUrl() { return pickupPhotoUrl; }
     public void setPickupPhotoUrl(String pickupPhotoUrl) { this.pickupPhotoUrl = pickupPhotoUrl; }
     public String getDeliveryPhotoUrl() { return deliveryPhotoUrl; }
     public void setDeliveryPhotoUrl(String deliveryPhotoUrl) { this.deliveryPhotoUrl = deliveryPhotoUrl; }
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
+    public double getCustomerPrice() { return customerPrice; }
+    public void setCustomerPrice(double customerPrice) { this.customerPrice = customerPrice; }
+    public double getRiderFee() { return riderFee; }
+    public void setRiderFee(double riderFee) { this.riderFee = riderFee; }
+    public double getNetProfit() { return netProfit; }
+    public void setNetProfit(double netProfit) { this.netProfit = netProfit; }
 }

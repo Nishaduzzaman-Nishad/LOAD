@@ -15,7 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.load_app.R;
 import com.example.load_app.models.Package;
-import com.example.load_app.models.ValidationUtils;
+import com.example.load_app.utils.PricingCalculator;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,7 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Random;
 
 public class CreatePackageActivity extends AppCompatActivity {
-    private EditText etPickup, etDrop, etPhone, etWeight, etType;
+    private EditText etCustName, etCustPhone, etRecvName, etRecvPhone, etPickup, etDrop, etWeight, etType;
     private Spinner spinnerPriority;
     private Button btnSave, btnPickContact;
     private FirebaseFirestore db;
@@ -47,9 +47,12 @@ public class CreatePackageActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
+        etCustName = findViewById(R.id.etCustName);
+        etCustPhone = findViewById(R.id.etCustPhone);
         etPickup = findViewById(R.id.etPickup);
         etDrop = findViewById(R.id.etDrop);
-        etPhone = findViewById(R.id.etPhone);
+        etRecvName = findViewById(R.id.etRecvName);
+        etRecvPhone = findViewById(R.id.etPhone);
         etWeight = findViewById(R.id.etWeight);
         etType = findViewById(R.id.etType);
         spinnerPriority = findViewById(R.id.spinnerPriority);
@@ -66,7 +69,7 @@ public class CreatePackageActivity extends AppCompatActivity {
             startActivityForResult(intent, 1001);
         });
 
-        btnSave.setOnClickListener(v -> savePackage());
+        btnSave.setOnClickListener(v -> validateAndCalculate());
     }
 
     @Override
@@ -78,48 +81,78 @@ public class CreatePackageActivity extends AppCompatActivity {
             Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                String number = cursor.getString(numberIndex);
-                etPhone.setText(number);
+                etRecvPhone.setText(cursor.getString(numberIndex));
                 cursor.close();
             }
         }
     }
 
-    private void savePackage() {
+    private void validateAndCalculate() {
+        String custName = etCustName.getText().toString().trim();
+        String custPhone = etCustPhone.getText().toString().trim();
+        String recvName = etRecvName.getText().toString().trim();
+        String recvPhone = etRecvPhone.getText().toString().trim();
         String pickup = etPickup.getText().toString().trim();
         String drop = etDrop.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
         String weightStr = etWeight.getText().toString().trim();
         String type = etType.getText().toString().trim();
         String priority = spinnerPriority.getSelectedItem().toString();
 
-        if (pickup.isEmpty()) { etPickup.setError("Required"); return; }
-        if (drop.isEmpty()) { etDrop.setError("Required"); return; }
-        String phoneError = ValidationUtils.getPhoneError(phone);
-        if (phoneError != null) { etPhone.setError(phoneError); return; }
-        if (weightStr.isEmpty()) { etWeight.setError("Required"); return; }
+        if (custName.isEmpty() || custPhone.isEmpty() || recvName.isEmpty() || recvPhone.isEmpty() || pickup.isEmpty() || drop.isEmpty() || weightStr.isEmpty()) {
+            Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         double weight = Double.parseDouble(weightStr);
-        String weightError = ValidationUtils.getWeightError(weight);
-        if (weightError != null) { etWeight.setError(weightError); return; }
-        if (type.isEmpty()) { etType.setError("Required"); return; }
+        double price = PricingCalculator.calculateCustomerPrice(weight, priority);
+        double riderFee = PricingCalculator.calculateRiderFee(price);
+        double netProfit = PricingCalculator.calculateNetProfit(price);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Confirm Delivery Cost");
+        builder.setMessage("Package Weight: " + weight + " kg\nPriority: " + priority +
+                "\n\nTotal Delivery Cost: ৳" + String.format("%.2f", price) +
+                "\n\nDoes the customer agree to this price?");
+
+        builder.setPositiveButton("Yes, Confirm & Save", (dialog, which) -> {
+            savePackageToFirestore(custName, custPhone, recvName, recvPhone, pickup, drop, weight, type, priority, price, riderFee, netProfit);
+        });
+
+        builder.setNegativeButton("No, Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        builder.setCancelable(false);
+        builder.show();
+    }
+
+    private void savePackageToFirestore(String custName, String custPhone, String recvName, String recvPhone,
+                                        String pickup, String drop, double weight, String type, String priority,
+                                        double price, double riderFee, double netProfit) {
 
         int randomNum = new Random().nextInt(900) + 100;
-        String packageId = "P" + randomNum;
-        int otpNum = new Random().nextInt(9000) + 1000;
-        String generatedOtp = String.valueOf(otpNum);
-        String customerId = (mAuth.getCurrentUser() != null) ? mAuth.getCurrentUser().getUid() : "UNKNOWN";
+        String packageId = "PKG-" + randomNum;
 
-        Package newPackage = new Package(packageId, pickup, drop, phone, weight, type, priority, customerId);
-        newPackage.setOtp(generatedOtp);
+        String pickupOtp = String.valueOf(new Random().nextInt(9000) + 1000);
+        String deliveryOtp = String.valueOf(new Random().nextInt(9000) + 1000);
+
+        Package newPackage = new Package(packageId, pickup, drop, recvPhone, weight, type, priority, "WALK_IN");
+        newPackage.setCustomerName(custName);
+        newPackage.setCustomerPhone(custPhone);
+        newPackage.setReceiverName(recvName);
+        newPackage.setPickupOtp(pickupOtp);
+        newPackage.setDeliveryOtp(deliveryOtp);
+        newPackage.setCustomerPrice(price);
+        newPackage.setRiderFee(riderFee);
+        newPackage.setNetProfit(netProfit);
 
         btnSave.setEnabled(false);
         db.collection("packages").document(packageId).set(newPackage)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         new AlertDialog.Builder(CreatePackageActivity.this)
-                                .setTitle("Success")
-                                .setMessage("Package Added!\nOTP for Delivery: " + generatedOtp)
+                                .setTitle("Package Created Successfully")
+                                .setMessage("Pickup OTP (Give to Sender): " + pickupOtp + "\n\nDelivery OTP (Give to Receiver): " + deliveryOtp)
                                 .setPositiveButton("OK", (dialog, which) -> finish())
                                 .setCancelable(false)
                                 .show();

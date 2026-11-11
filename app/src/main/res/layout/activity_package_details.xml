@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvDetailPkgId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PKG-001"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvDetailStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PENDING"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/badge_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/warningOrange"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDetailPkgId" />
+
+        <TextView
+            android:id="@+id/tvDetailPriority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="URGENT"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@color/errorRed"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvDetailStatus"
+            app:layout_constraintStart_toEndOf="@id/tvDetailStatus"
+            app:layout_constraintTop_toTopOf="@id/tvDetailStatus" />
+
+        <!-- Sender/Receiver Boxes -->
+        <LinearLayout
+            android:id="@+id/llPeople"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvDetailStatus">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="@color/surface">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sender" android:textStyle="bold" android:textColor="@color/primary" />
+                    <TextView android:id="@+id/tvDetailSenderName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Name" android:textSize="14sp" android:layout_marginTop="4dp" />
+                    <TextView android:id="@+id/tvDetailSenderPhone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phone" android:textSize="12sp" android:textColor="@color/textSecondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="@color/surface">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Receiver" android:textStyle="bold" android:textColor="@color/primary" />
+                    <TextView android:id="@+id/tvDetailRecvName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Name" android:textSize="14sp" android:layout_marginTop="4dp" />
+                    <TextView android:id="@+id/tvDetailRecvPhone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phone" android:textSize="12sp" android:textColor="@color/textSecondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivDetailProof"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="16dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:background="@color/textSecondary"
+            app:layout_constraintTop_toBottomOf="@id/llPeople" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRoute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface"
+            app:layout_constraintTop_toBottomOf="@id/ivDetailProof">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Route &amp; Details" android:textStyle="bold" android:textColor="@color/primary" />
+                <TextView android:id="@+id/tvDetailRoute" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pickup\nDrop\nWeight" android:textSize="14sp" android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface"
+            app:layout_constraintTop_toBottomOf="@id/cardRoute">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Assigned Rider" android:textStyle="bold" android:textColor="@color/primary" />
+                <TextView android:id="@+id/tvDetailRider" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rider Name\nPhone" android:textSize="14sp" android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface"
+            app:layout_constraintTop_toBottomOf="@id/cardRider">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Financials" android:textStyle="bold" android:textColor="@color/primary" />
+                <TextView android:id="@+id/tvDetailFinancials" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Price\nFee\nProfit" android:textSize="14sp" android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardOtp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface"
+            app:layout_constraintTop_toBottomOf="@id/cardFin">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Security OTPs" android:textStyle="bold" android:textColor="@color/primary" />
+                <TextView android:id="@+id/tvDetailOtps" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pickup\nDelivery" android:textSize="14sp" android:layout_marginTop="8dp" android:textColor="@color/warningOrange"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

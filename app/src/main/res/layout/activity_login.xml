@@ -11,53 +11,80 @@
         android:layout_height="wrap_content"
         android:padding="24dp">
 
+        <!-- Header Area -->
+        <LinearLayout
+            android:id="@+id/headerRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_truck"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LOAD"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchLoginTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dark"
+            android:textColor="@color/textPrimary"
+            app:layout_constraintBottom_toBottomOf="@id/headerRow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/headerRow" />
+
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome Back"
             android:textColor="@color/primary"
-            android:textSize="32sp"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:layout_marginTop="40dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="32dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/headerRow" />
 
         <TextView
             android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Log in to continue"
+            android:text="Log in to continue to your dashboard"
             android:textColor="@color/textSecondary"
             android:textSize="14sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-        <!-- Toggle: Email vs Phone -->
+        <!-- Tabs -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             app:tabIndicatorColor="@color/accent"
             app:tabSelectedTextColor="@color/primary"
             app:tabTextColor="@color/textSecondary"
             app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email Login" />
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Phone Login" />
+            <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Email Login" />
+            <com.google.android.material.tabs.TabItem android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phone Login" />
         </com.google.android.material.tabs.TabLayout>
 
+        <!-- Inputs -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEmail"
             android:layout_width="match_parent"
@@ -71,7 +98,6 @@
             app:boxCornerRadiusTopStart="12dp"
             app:boxStrokeColor="@color/primary"
             app:layout_constraintTop_toBottomOf="@id/tabLayout">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
@@ -93,7 +119,6 @@
             app:boxStrokeColor="@color/primary"
             app:passwordToggleEnabled="true"
             app:layout_constraintTop_toBottomOf="@id/tilEmail">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
@@ -107,7 +132,7 @@
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
             android:text="LOGIN"
-            android:textColor="@color/primary"
+            android:textColor="@color/textOnAccent"
             android:textStyle="bold"
             android:backgroundTint="@color/accent"
             app:cornerRadius="12dp"
@@ -127,7 +152,6 @@
             <View android:layout_width="0dp" android:layout_height="1dp" android:background="@color/textSecondary" android:layout_weight="1" />
         </LinearLayout>
 
-        <!-- Google Sign-In Button -->
         <Button
             android:id="@+id/btnGoogleLogin"
             android:layout_width="match_parent"

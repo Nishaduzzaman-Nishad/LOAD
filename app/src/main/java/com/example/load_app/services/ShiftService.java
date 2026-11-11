@@ -31,9 +31,13 @@ public class ShiftService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Start the foreground service immediately
         startForeground(1, buildNotification("00:00:00"));
 
+        if (handler != null && runnable != null) {
+            handler.removeCallbacks(runnable);
+        }
+
+        seconds = 0;
         handler = new Handler(Looper.getMainLooper());
         runnable = new Runnable() {
             @Override
@@ -49,7 +53,6 @@ public class ShiftService extends Service {
                     manager.notify(1, buildNotification(time));
                 }
 
-                // Loop every 1 second (1000 ms)
                 handler.postDelayed(this, 1000);
             }
         };
@@ -59,7 +62,6 @@ public class ShiftService extends Service {
     }
 
     private Notification buildNotification(String time) {
-        // This intent opens the Rider Dashboard when the notification is tapped
         Intent notificationIntent = new Intent(this, RiderDashboardActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -67,10 +69,10 @@ public class ShiftService extends Service {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Shift Active")
                 .setContentText("Time elapsed: " + time)
-                .setSmallIcon(R.mipmap.ic_launcher) // Using your existing icon
-                .setContentIntent(pendingIntent)    // Added: Opens app on tap
+                .setSmallIcon(R.drawable.ic_truck_foreground)
+                .setContentIntent(pendingIntent)
                 .setOngoing(true)
-                .setOnlyAlertOnce(true)             // Stops sound/vibration from spamming every second
+                .setOnlyAlertOnce(true)
                 .build();
     }
 

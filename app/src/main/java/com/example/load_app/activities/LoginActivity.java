@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.load_app.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -29,6 +30,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText etEmail, etPassword;
     private Button btnLogin, btnGoogleLogin;
     private TextView tvGoToRegister;
+    private com.google.android.material.textfield.TextInputLayout tilEmail;
+    private com.google.android.material.switchmaterial.SwitchMaterial switchTheme;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private GoogleSignInClient mGoogleSignInClient;
@@ -55,10 +58,24 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        tilEmail = findViewById(R.id.tilEmail);
         btnLogin = findViewById(R.id.btnLogin);
         btnGoogleLogin = findViewById(R.id.btnGoogleLogin);
         tvGoToRegister = findViewById(R.id.tvGoToRegister);
+        switchTheme = findViewById(R.id.switchLoginTheme);
         TabLayout tabLayout = findViewById(R.id.tabLayout);
+
+        int currentNightMode = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        switchTheme.setChecked(currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES);
+        switchTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (buttonView.isPressed()) {
+                if (isChecked) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
+            }
+        });
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -71,13 +88,14 @@ public class LoginActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getPosition() == 0) {
                     isPhoneLogin = false;
-                    etEmail.setHint("Email Address");
+                    tilEmail.setHint("Email Address");
                     etEmail.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 } else {
                     isPhoneLogin = true;
-                    etEmail.setHint("Phone Number (e.g. +88017...)");
+                    tilEmail.setHint("Phone Number (e.g. 017...)");
                     etEmail.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
                 }
+                etEmail.setText("");
             }
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
@@ -97,26 +115,54 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        btnLogin.setEnabled(false);
+
         if (isPhoneLogin) {
             String cleanPhone = sanitizePhoneNumber(input);
             if (cleanPhone == null) {
-                Toast.makeText(this, "Invalid Phone! Use 01XXXXXXXXX or +8801XXXXXXXXX", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Invalid Phone! Use 01XXXXXXXXX", Toast.LENGTH_LONG).show();
+                btnLogin.setEnabled(true);
                 return;
             }
-            input = cleanPhone + "@load-app.com";
+
+            // SMART FIX: Look up the user by phone in Firestore to find their actual Auth Email
+            db.collection("users").whereEqualTo("phone", cleanPhone).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                    // User exists, get their email
+                    String actualEmail = task.getResult().getDocuments().get(0).getString("email");
+
+                    // If the stored email doesn't have an @, it means they registered with phone directly in the email field
+                    if (actualEmail != null && !actualEmail.contains("@")) {
+                        actualEmail = sanitizePhoneNumber(actualEmail) + "@load-app.com";
+                    }
+
+                    // If actualEmail is somehow null, fallback to default
+                    if (actualEmail == null) {
+                        actualEmail = cleanPhone + "@load-app.com";
+                    }
+
+                    signInWithEmail(actualEmail, password);
+                } else {
+                    // If not found by phone in Firestore, try the default mapped email
+                    signInWithEmail(cleanPhone + "@load-app.com", password);
+                }
+            });
         } else {
             if (!Patterns.EMAIL_ADDRESS.matcher(input).matches()) {
                 Toast.makeText(this, "Invalid Email format", Toast.LENGTH_SHORT).show();
+                btnLogin.setEnabled(true);
                 return;
             }
+            signInWithEmail(input, password);
         }
+    }
 
-        btnLogin.setEnabled(false);
-        mAuth.signInWithEmailAndPassword(input, password).addOnCompleteListener(this, task -> {
+    private void signInWithEmail(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 routeUserBasedOnRole();
             } else {
-                Toast.makeText(LoginActivity.this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "Login Failed: Check credentials", Toast.LENGTH_LONG).show();
                 btnLogin.setEnabled(true);
             }
         });
@@ -146,14 +192,10 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 String userId = mAuth.getCurrentUser().getUid();
-
-                // Check if user exists
                 db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
                     if (!doc.exists()) {
-                        // FIRST TIME GOOGLE LOGIN: Ask for role!
                         showRoleSelectionDialog(userId);
                     } else {
-                        // Returning Google user, route them normally
                         routeUserBasedOnRole();
                     }
                 });
@@ -163,18 +205,13 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // NEW METHOD: Beautiful Dialog to select role for Google Users
     private void showRoleSelectionDialog(String userId) {
         String[] roles = {"CUSTOMER", "RIDER", "P2P", "ADMIN"};
-
         new AlertDialog.Builder(this)
                 .setTitle("Select Your Role")
-                .setMessage("Welcome! Please select how you will use LOAD:")
                 .setCancelable(false)
                 .setItems(roles, (dialog, which) -> {
                     String selectedRole = roles[which];
-
-                    // Create user profile in Firestore with selected role
                     java.util.Map<String, Object> user = new java.util.HashMap<>();
                     user.put("userId", userId);
                     user.put("fullName", mAuth.getCurrentUser().getDisplayName());
@@ -183,11 +220,9 @@ public class LoginActivity extends AppCompatActivity {
                     user.put("role", selectedRole);
 
                     db.collection("users").document(userId).set(user).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(LoginActivity.this, "Registered as " + selectedRole, Toast.LENGTH_SHORT).show();
                         routeUserBasedOnRole();
                     });
-                })
-                .show();
+                }).show();
     }
 
     private void routeUserBasedOnRole() {
@@ -195,8 +230,6 @@ public class LoginActivity extends AppCompatActivity {
         db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 String role = doc.getString("role");
-                Toast.makeText(LoginActivity.this, "Logged in as: " + role, Toast.LENGTH_SHORT).show();
-
                 if ("RIDER".equals(role)) {
                     startActivity(new Intent(LoginActivity.this, RiderDashboardActivity.class));
                 } else if ("CUSTOMER".equals(role)) {
@@ -207,9 +240,6 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
                 }
                 finish();
-            } else {
-                Toast.makeText(LoginActivity.this, "User profile not found in Database.", Toast.LENGTH_LONG).show();
-                btnLogin.setEnabled(true);
             }
         });
     }

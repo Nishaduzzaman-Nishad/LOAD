@@ -17,5 +17,6 @@
     <!-- Text -->
     <color name="textPrimary">#172B3A</color> <!-- Dark Navy/Black -->
     <color name="textSecondary">#6B7280</color>
+    <color name="textOnAccent">#0B2D4A</color>
     <color name="white">#FFFFFF</color>
 </resources>

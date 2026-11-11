@@ -24,11 +24,11 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilPickup"
+            android:id="@+id/tilCustName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:hint="Pickup Address (e.g., Dhanmondi)"
+            android:hint="Sender Name"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
@@ -36,6 +36,46 @@
             app:boxCornerRadiusTopStart="12dp"
             app:boxStrokeColor="@color/primary"
             app:layout_constraintTop_toBottomOf="@id/tvTitle">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCustName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCustPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Sender Phone"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxStrokeColor="@color/primary"
+            app:layout_constraintTop_toBottomOf="@id/tilCustName">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCustPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPickup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Pickup Address"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxStrokeColor="@color/primary"
+            app:layout_constraintTop_toBottomOf="@id/tilCustPhone">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPickup"
                 android:layout_width="match_parent"
@@ -48,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Drop Address (e.g., Gulshan)"
+            android:hint="Drop Address"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
@@ -64,6 +104,26 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRecvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Receiver Name"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxStrokeColor="@color/primary"
+            app:layout_constraintTop_toBottomOf="@id/tilDrop">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRecvName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,7 +135,7 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusTopStart="12dp"
             app:boxStrokeColor="@color/primary"
-            app:layout_constraintTop_toBottomOf="@id/tilDrop">
+            app:layout_constraintTop_toBottomOf="@id/tilRecvName">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPhone"
                 android:layout_width="match_parent"
@@ -87,10 +147,11 @@
             android:id="@+id/btnPickContact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pick Phone from Contacts"
+            android:text="Pick from Contacts"
             android:textColor="@color/primary"
+            android:textStyle="bold"
             style="@style/Widget.MaterialComponents.Button.TextButton"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilPhone" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -118,7 +179,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Package Type (e.g. Fragile)"
+            android:hint="Package Type"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
@@ -137,9 +198,8 @@
             android:id="@+id/tvPriorityLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Priority Level"
+            android:text="Priority"
             android:textColor="@color/textPrimary"
-            android:textStyle="bold"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilType" />
@@ -156,8 +216,8 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:text="SAVE PACKAGE"
-            android:textColor="@color/primary"
+            android:text="CALCULATE PRICE &amp; PROCEED"
+            android:textColor="@color/textOnAccent"
             android:textStyle="bold"
             android:backgroundTint="@color/accent"
             app:cornerRadius="12dp"

@@ -11,7 +11,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.load_app.R;
-import com.example.load_app.models.ValidationUtils;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,67 +69,63 @@ public class RegisterActivity extends AppCompatActivity {
 
         if (fullName.isEmpty()) { etFullName.setError("Required"); return; }
 
-        // 1. Sanitize the Phone field (allows +880, 880, dashes)
         String sanitizedPhone = sanitizePhoneNumber(phoneInput);
-        if (sanitizedPhone == null) {
-            etPhone.setError("Invalid BD Phone Number");
-            return;
-        }
+        if (sanitizedPhone == null) { etPhone.setError("Invalid BD Phone Number"); return; }
 
-        // 2. Handle Email/Phone logic for Firebase Auth
-        String firebaseEmail = emailInput;
+        // FIX: Create a final variable for the lambda
+        final String finalFirebaseEmail;
+
         if (!emailInput.contains("@")) {
-            // If they typed a phone number in the email field, sanitize it
             String cleanPhoneEmail = sanitizePhoneNumber(emailInput);
-            if (cleanPhoneEmail == null) {
-                etEmail.setError("Invalid Email or Phone");
-                return;
-            }
-            firebaseEmail = cleanPhoneEmail + "@load-app.com";
+            if (cleanPhoneEmail == null) { etEmail.setError("Invalid Email or Phone"); return; }
+            finalFirebaseEmail = cleanPhoneEmail + "@load-app.com";
         } else {
-            // Standard Email Validation
             if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
-                etEmail.setError("Invalid Email format");
-                return;
+                etEmail.setError("Invalid Email format"); return;
             }
+            finalFirebaseEmail = emailInput;
         }
 
-        // 3. Password Validation
-        String passwordError = ValidationUtils.getPasswordError(password);
-        if (passwordError != null) { etPassword.setError(passwordError); return; }
+        if (password.length() < 6) { etPassword.setError("Min 6 chars"); return; }
         if (!password.equals(confirmPassword)) { etConfirmPassword.setError("Mismatch"); return; }
 
         btnRegister.setEnabled(false);
 
-        mAuth.createUserWithEmailAndPassword(firebaseEmail, password).addOnCompleteListener(this, task -> {
-            if (task.isSuccessful()) {
-                String userId = mAuth.getCurrentUser().getUid();
-
-                Map<String, Object> user = new HashMap<>();
-                user.put("userId", userId);
-                user.put("fullName", fullName);
-                user.put("email", emailInput); // Store what they originally typed
-                user.put("phone", sanitizedPhone); // Store the clean phone
-                user.put("role", role);
-
-                db.collection("users").document(userId).set(user).addOnCompleteListener(task1 -> {
-                    if (task1.isSuccessful()) {
-                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                        finish();
-                    } else {
-                        Toast.makeText(RegisterActivity.this, "Firestore Error: " + task1.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        btnRegister.setEnabled(true);
-                    }
-                });
-            } else {
-                Toast.makeText(RegisterActivity.this, "Auth Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+        // Check for duplicate phone in Firestore
+        db.collection("users").whereEqualTo("phone", sanitizedPhone).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                Toast.makeText(RegisterActivity.this, "Phone number already registered!", Toast.LENGTH_LONG).show();
                 btnRegister.setEnabled(true);
+                return;
             }
+
+            // Create Auth User
+            mAuth.createUserWithEmailAndPassword(finalFirebaseEmail, password).addOnCompleteListener(this, authTask -> {
+                if (authTask.isSuccessful()) {
+                    String userId = mAuth.getCurrentUser().getUid();
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("userId", userId);
+                    user.put("fullName", fullName);
+                    user.put("email", emailInput);
+                    user.put("phone", sanitizedPhone);
+                    user.put("role", role);
+                    user.put("isOnDuty", true); // Set default duty status
+
+                    db.collection("users").document(userId).set(user).addOnCompleteListener(dbTask -> {
+                        if (dbTask.isSuccessful()) {
+                            Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                            finish();
+                        }
+                    });
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Error: Account already exists!", Toast.LENGTH_LONG).show();
+                    btnRegister.setEnabled(true);
+                }
+            });
         });
     }
 
-    // Helper to clean +880, dashes, and spaces
     private String sanitizePhoneNumber(String phone) {
         if (phone == null) return null;
         String digits = phone.replaceAll("[^0-9]", "");

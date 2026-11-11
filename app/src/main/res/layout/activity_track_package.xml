@@ -1,82 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Track Package"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary" />
-
-    <TextView
-        android:id="@+id/tvTrackPkgId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PKG-001"
-        android:textSize="18sp"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/textSecondary" />
-
-    <!-- Visual Timeline -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="32dp"
-        android:paddingStart="16dp">
+        android:padding="16dp"
+        android:paddingBottom="24dp">
 
         <TextView
-            android:id="@+id/stepPlaced"
+            android:id="@+id/tvTrackPkgId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="● Order Placed"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="2dp"
-            android:layout_height="40dp"
-            android:background="@color/textSecondary"
-            android:layout_marginStart="8dp" />
+            android:text="Package: PKG-001"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/stepAssigned"
+            android:id="@+id/tvTrackDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="○ Rider Assigned"
-            android:textSize="16sp" />
+            android:text="Created: 12 Nov 2026, 10:30 AM"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTrackPkgId" />
 
-        <View
-            android:layout_width="2dp"
-            android:layout_height="40dp"
-            android:background="@color/textSecondary"
-            android:layout_marginStart="8dp" />
-
-        <TextView
-            android:id="@+id/stepPickedUp"
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRiderInfo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="○ Picked Up"
-            android:textSize="16sp" />
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/surface"
+            app:layout_constraintTop_toBottomOf="@id/tvTrackDate">
 
-        <View
-            android:layout_width="2dp"
-            android:layout_height="40dp"
-            android:background="@color/textSecondary"
-            android:layout_marginStart="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/stepDelivered"
-            android:layout_width="wrap_content"
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_person"
+                    app:tint="@color/primary"
+                    android:background="@color/background"
+                    android:padding="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:id="@+id/tvTrackRiderName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rider: Not Assigned"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/textPrimary" />
+
+                    <TextView
+                        android:id="@+id/tvTrackRiderPhone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Waiting for assignment"
+                        android:textSize="14sp"
+                        android:textColor="@color/textSecondary" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPackageDetails"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="○ Delivered"
-            android:textSize="16sp" />
-    </LinearLayout>
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/surface"
+            app:layout_constraintTop_toBottomOf="@id/cardRiderInfo">
 
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvTrackPickup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pickup: Dhanmondi"
+                    android:textSize="14sp"
+                    android:textColor="@color/textSecondary" />
+
+                <TextView
+                    android:id="@+id/tvTrackDrop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drop: Gulshan"
+                    android:textSize="14sp"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvTrackPickupOtp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pickup OTP: 1234"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:layout_marginTop="12dp" />
+
+                <TextView
+                    android:id="@+id/tvTrackOtp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Delivery OTP: 1234"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/warningOrange"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/timelineLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            android:paddingStart="16dp"
+            app:layout_constraintTop_toBottomOf="@id/cardPackageDetails">
+
+            <TextView
+                android:id="@+id/stepPlaced"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="● Order Placed"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="40dp"
+                android:background="@color/textSecondary"
+                android:layout_marginStart="8dp" />
+
+            <TextView
+                android:id="@+id/stepAssigned"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="○ Rider Assigned"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="40dp"
+                android:background="@color/textSecondary"
+                android:layout_marginStart="8dp" />
+
+            <TextView
+                android:id="@+id/stepPickedUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="○ Picked Up"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="40dp"
+                android:background="@color/textSecondary"
+                android:layout_marginStart="8dp" />
+
+            <TextView
+                android:id="@+id/stepDelivered"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="○ Delivered"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnRateRider"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp"
+            android:text="⭐ RATE RIDER"
+            android:textColor="@color/textOnAccent"
+            android:textStyle="bold"
+            android:backgroundTint="@color/accent"
+            android:visibility="gone"
+            app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/timelineLayout" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -27,25 +27,22 @@ import com.example.load_app.R;
 import com.example.load_app.models.Package;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.osmdroid.config.Configuration;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.Polyline;
-
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DeliveryActivity extends AppCompatActivity {
-    private TextView tvPackageId, tvPickupAddress, tvDropAddress, tvWeight, tvOtpDisplay;
-    private Button btnNavigate, btnCall, btnTakePhoto, btnCompleteDelivery;
+    private TextView tvPackageId, tvSenderInfo, tvReceiverInfo, tvPickupAddress, tvDropAddress, tvWeight, tvPhaseStatus;
+    private Button btnNavigate, btnCall, btnTakePhoto, btnCompleteDelivery, btnUnassign;
     private ImageView ivProofPhoto;
     private Package currentPackage;
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
     private ProgressDialog progressDialog;
-    private MapView map;
+    private boolean isPickupPhase = true;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int CAMERA_REQUEST_CODE = 101;
@@ -66,64 +63,35 @@ public class DeliveryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_delivery);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Saving Photo to Database...");
+        progressDialog.setMessage("Saving...");
         progressDialog.setCancelable(false);
 
         String packageId = getIntent().getStringExtra("PACKAGE_ID");
         if (packageId == null) { finish(); return; }
 
         tvPackageId = findViewById(R.id.tvPackageId);
+        tvSenderInfo = findViewById(R.id.tvSenderInfo);
+        tvReceiverInfo = findViewById(R.id.tvReceiverInfo);
         tvPickupAddress = findViewById(R.id.tvPickupAddress);
         tvDropAddress = findViewById(R.id.tvDropAddress);
         tvWeight = findViewById(R.id.tvWeight);
-        tvOtpDisplay = findViewById(R.id.tvOtpDisplay);
+        tvPhaseStatus = findViewById(R.id.tvPhaseStatus);
         btnNavigate = findViewById(R.id.btnNavigate);
         btnCall = findViewById(R.id.btnCall);
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
         btnCompleteDelivery = findViewById(R.id.btnCompleteDelivery);
+        btnUnassign = findViewById(R.id.btnUnassign);
         ivProofPhoto = findViewById(R.id.ivProofPhoto);
-        map = findViewById(R.id.map);
 
-        // Initialize Map config early
-        Configuration.getInstance().load(getApplicationContext(), androidx.preference.PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        loadPackageData(packageId);
 
-        db.collection("packages").document(packageId).get().addOnSuccessListener(doc -> {
-            currentPackage = doc.toObject(Package.class);
-            if (currentPackage != null) {
-                tvPackageId.setText("Package: " + currentPackage.getPackageId());
-                tvPickupAddress.setText("Pickup: " + currentPackage.getPickupAddress());
-                tvDropAddress.setText("Drop: " + currentPackage.getDropAddress());
-                tvWeight.setText("Weight: " + currentPackage.getWeightKg() + " kg");
-                tvOtpDisplay.setText("Secret OTP: " + currentPackage.getOtp());
-
-                String savedPhoto = currentPackage.getDeliveryPhotoUrl() != null ?
-                        currentPackage.getDeliveryPhotoUrl() :
-                        currentPackage.getPickupPhotoUrl();
-
-                if (savedPhoto != null && !savedPhoto.isEmpty()) {
-                    Bitmap decodedImage = decodeBase64ToBitmap(savedPhoto);
-                    if (decodedImage != null) {
-                        ivProofPhoto.setImageBitmap(decodedImage);
-                        ivProofPhoto.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                if (currentPackage.getStatus().equals(Package.STATUS_DELIVERED)) {
-                    btnCompleteDelivery.setEnabled(false);
-                    btnTakePhoto.setEnabled(false);
-                }
-
-                // Draw the route on the map
-                setupMap(currentPackage.getPickupAddress(), currentPackage.getDropAddress());
-            }
-        });
-
-        // Fallback to external Google Maps
         btnNavigate.setOnClickListener(v -> {
             if (currentPackage != null) {
-                Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(currentPackage.getDropAddress()));
+                String target = isPickupPhase ? currentPackage.getPickupAddress() : currentPackage.getDropAddress();
+                Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(target));
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                 mapIntent.setPackage("com.google.android.apps.maps");
                 startActivity(mapIntent);
@@ -132,8 +100,9 @@ public class DeliveryActivity extends AppCompatActivity {
 
         btnCall.setOnClickListener(v -> {
             if (currentPackage != null) {
+                String phoneToCall = isPickupPhase ? currentPackage.getCustomerPhone() : currentPackage.getReceiverPhone();
                 Intent callIntent = new Intent(Intent.ACTION_DIAL);
-                callIntent.setData(Uri.parse("tel:" + currentPackage.getReceiverPhone()));
+                callIntent.setData(Uri.parse("tel:" + phoneToCall));
                 startActivity(callIntent);
             }
         });
@@ -146,120 +115,178 @@ public class DeliveryActivity extends AppCompatActivity {
             }
         });
 
-        btnCompleteDelivery.setOnClickListener(v -> showOtpDialog());
+        btnCompleteDelivery.setOnClickListener(v -> {
+            if (isPickupPhase) showOtpDialog(true);
+            else showOtpDialog(false);
+        });
+
+        btnUnassign.setOnClickListener(v -> {
+            if (currentPackage == null) return;
+            new AlertDialog.Builder(this)
+                    .setTitle("Unassign Package?")
+                    .setMessage("Are you sure? A 20% penalty (৳" + (currentPackage.getRiderFee() * 0.2) + ") will be deducted from your earnings.")
+                    .setPositiveButton("Yes, Unassign", (dialog, which) -> {
+                        double penalty = currentPackage.getRiderFee() * 0.2;
+
+                        currentPackage.setStatus(Package.STATUS_PENDING);
+                        currentPackage.setAssignedRiderId(null);
+                        db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage);
+
+                        String uid = mAuth.getCurrentUser().getUid();
+                        db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
+                            double currentPenalty = doc.getDouble("totalPenalty") != null ? doc.getDouble("totalPenalty") : 0.0;
+                            db.collection("users").document(uid).update("totalPenalty", currentPenalty + penalty);
+                        });
+
+                        Map<String, Object> platformEarning = new HashMap<>();
+                        platformEarning.put("amount", penalty);
+                        platformEarning.put("reason", "Unassign Penalty - " + currentPackage.getPackageId());
+                        platformEarning.put("timestamp", System.currentTimeMillis());
+                        db.collection("platform_earnings").add(platformEarning);
+
+                        Map<String, Object> alert = new HashMap<>();
+                        alert.put("message", "Rider unassigned Package " + currentPackage.getPackageId() + ". Penalty applied: ৳" + penalty);
+                        alert.put("timestamp", System.currentTimeMillis());
+                        db.collection("admin_notifications").add(alert);
+
+                        Toast.makeText(this, "Unassigned. Penalty applied.", Toast.LENGTH_LONG).show();
+                        finish();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
     }
 
-    private void setupMap(String pickup, String drop) {
-        map.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
-        map.setMultiTouchControls(true);
+    private void loadPackageData(String packageId) {
+        db.collection("packages").document(packageId).get().addOnSuccessListener(doc -> {
+            currentPackage = doc.toObject(Package.class);
+            if (currentPackage != null) {
+                tvPackageId.setText("Package: " + currentPackage.getPackageId());
+                tvSenderInfo.setText("Sender: " + currentPackage.getCustomerName() + " (" + currentPackage.getCustomerPhone() + ")");
+                tvReceiverInfo.setText("Receiver: " + (currentPackage.getReceiverName() != null ? currentPackage.getReceiverName() : "Customer") + " (" + currentPackage.getReceiverPhone() + ")");
+                tvPickupAddress.setText("Pickup: " + currentPackage.getPickupAddress());
+                tvDropAddress.setText("Drop: " + currentPackage.getDropAddress());
+                tvWeight.setText("Weight: " + currentPackage.getWeightKg() + " kg");
 
-        GeoPoint startPoint = getZoneCoordinates(pickup);
-        GeoPoint endPoint = getZoneCoordinates(drop);
+                isPickupPhase = Package.STATUS_ASSIGNED.equals(currentPackage.getStatus());
 
-        if (startPoint != null && endPoint != null) {
-            map.getController().setZoom(11.5);
-            map.getController().setCenter(new GeoPoint((startPoint.getLatitude() + endPoint.getLatitude()) / 2,
-                    (startPoint.getLongitude() + endPoint.getLongitude()) / 2));
+                if (isPickupPhase) {
+                    tvPhaseStatus.setText("PHASE 1: ARRIVED AT PICKUP");
+                    tvPhaseStatus.setBackgroundColor(getResources().getColor(R.color.primary));
+                    btnCompleteDelivery.setText("VERIFY PICKUP OTP");
+                    btnNavigate.setText("NAVIGATE TO PICKUP");
+                    btnCall.setText("CALL SENDER");
+                    ivProofPhoto.setVisibility(View.GONE);
+                } else {
+                    tvPhaseStatus.setText("PHASE 2: DELIVER TO CUSTOMER");
+                    tvPhaseStatus.setBackgroundColor(getResources().getColor(R.color.successGreen));
+                    btnCompleteDelivery.setText("VERIFY DELIVERY OTP");
+                    btnNavigate.setText("NAVIGATE TO DROP");
+                    btnCall.setText("CALL RECEIVER");
 
-            Marker startMarker = new Marker(map);
-            startMarker.setPosition(startPoint);
-            startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            startMarker.setTitle("Pickup: " + pickup);
-            map.getOverlays().add(startMarker);
-
-            Marker endMarker = new Marker(map);
-            endMarker.setPosition(endPoint);
-            endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            endMarker.setTitle("Drop: " + drop);
-            map.getOverlays().add(endMarker);
-
-            Polyline line = new Polyline();
-            ArrayList<GeoPoint> points = new ArrayList<>();
-            points.add(startPoint);
-            points.add(new GeoPoint(23.7500, 90.3900)); // Farmgate center as detour
-            points.add(endPoint);
-
-            line.setPoints(points);
-            line.setColor(android.graphics.Color.parseColor("#FFC107")); // Yellow Dijkstra Line
-            line.setWidth(10f);
-            map.getOverlays().add(line);
-        }
-        map.invalidate(); // Refresh map drawing
+                    if (currentPackage.getPickupPhotoUrl() != null) {
+                        ivProofPhoto.setImageBitmap(decodeBase64ToBitmap(currentPackage.getPickupPhotoUrl()));
+                        ivProofPhoto.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        });
     }
 
-    private GeoPoint getZoneCoordinates(String address) {
-        if (address == null) return null;
-        String lower = address.toLowerCase();
-        if (lower.contains("uttara")) return new GeoPoint(23.8759, 90.3795);
-        if (lower.contains("mirpur")) return new GeoPoint(23.8069, 90.3687);
-        if (lower.contains("gulshan")) return new GeoPoint(23.7925, 90.4078);
-        if (lower.contains("farmgate")) return new GeoPoint(23.7581, 90.3901);
-        if (lower.contains("dhanmondi")) return new GeoPoint(23.7465, 90.3760);
-        if (lower.contains("motijheel")) return new GeoPoint(23.7331, 90.4174);
-        return new GeoPoint(23.8103, 90.4125); // Default Dhaka center
+    private void showOtpDialog(boolean isPickup) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(isPickup ? "Enter Pickup OTP" : "Enter Delivery OTP");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        builder.setView(input);
+
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            String enteredOtp = input.getText().toString().trim();
+            String correctOtp = isPickup ? currentPackage.getPickupOtp() : currentPackage.getDeliveryOtp();
+
+            if (correctOtp != null && enteredOtp.equals(correctOtp)) {
+                if (isPickup) {
+                    if (ivProofPhoto.getVisibility() != View.VISIBLE) {
+                        Toast.makeText(this, "Please take a pickup photo first!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    currentPackage.setStatus(Package.STATUS_PICKED_UP);
+                    db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Pickup Verified!", Toast.LENGTH_LONG).show();
+                                loadPackageData(currentPackage.getPackageId());
+                            });
+                } else {
+                    currentPackage.setStatus(Package.STATUS_DELIVERED);
+                    db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Delivery Completed!", Toast.LENGTH_LONG).show();
+                                finish();
+                            });
+                }
+            } else {
+                Toast.makeText(this, "Invalid OTP!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
     }
 
     private void openCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (cameraIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-        } else {
-            Toast.makeText(this, "No camera app found on device", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera();
-            } else {
-                Toast.makeText(this, "Camera Permission is required to take photo", Toast.LENGTH_LONG).show();
-            }
+        if (requestCode == CAMERA_PERMISSION_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            openCamera();
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-            if (data != null && data.getExtras() != null) {
-                Bitmap photo = (Bitmap) data.getExtras().get("data");
-                if (photo != null) {
-                    ivProofPhoto.setImageBitmap(photo);
-                    ivProofPhoto.setVisibility(View.VISIBLE);
-                    saveImageToFirestore(photo);
-                }
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getExtras() != null) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            if (photo != null) {
+                Bitmap resizedPhoto = getResizedBitmap(photo, 800);
+                ivProofPhoto.setImageBitmap(resizedPhoto);
+                ivProofPhoto.setVisibility(View.VISIBLE);
+                saveImageToFirestore(resizedPhoto);
             }
         }
     }
 
+    private Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize; height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize; width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
+
     private void saveImageToFirestore(Bitmap bitmap) {
         if (currentPackage == null) return;
-
         progressDialog.show();
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-        byte[] data = baos.toByteArray();
-        String base64Image = Base64.encodeToString(data, Base64.DEFAULT);
+        String base64Image = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
-        if (currentPackage.getStatus().equals(Package.STATUS_ASSIGNED)) {
-            currentPackage.setStatus(Package.STATUS_PICKED_UP);
-            currentPackage.setPickupPhotoUrl(base64Image);
-        } else {
-            currentPackage.setDeliveryPhotoUrl(base64Image);
-        }
+        if (isPickupPhase) currentPackage.setPickupPhotoUrl(base64Image);
+        else currentPackage.setDeliveryPhotoUrl(base64Image);
 
         db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage)
                 .addOnCompleteListener(task -> {
                     progressDialog.dismiss();
-                    if (task.isSuccessful()) {
-                        Toast.makeText(DeliveryActivity.this, "Photo Saved & Status Updated!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(DeliveryActivity.this, "Failed to save photo", Toast.LENGTH_LONG).show();
-                    }
+                    if (task.isSuccessful()) Toast.makeText(DeliveryActivity.this, "Photo Saved!", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -267,47 +294,6 @@ public class DeliveryActivity extends AppCompatActivity {
         try {
             byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private void showOtpDialog() {
-        if (currentPackage == null) return;
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter Receiver OTP");
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        builder.setView(input);
-
-        builder.setPositiveButton("Confirm", (dialog, which) -> {
-            String enteredOtp = input.getText().toString().trim();
-            if (enteredOtp.equals(currentPackage.getOtp())) {
-                currentPackage.setStatus(Package.STATUS_DELIVERED);
-                db.collection("packages").document(currentPackage.getPackageId()).set(currentPackage)
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(this, "Delivery Completed Successfully!", Toast.LENGTH_LONG).show();
-                            finish();
-                        });
-            } else {
-                Toast.makeText(this, "Invalid OTP! Please ask the customer.", Toast.LENGTH_SHORT).show();
-            }
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-        builder.show();
-    }
-
-    // OSMDROID LIFECYCLE OVERRIDES (Required to prevent crashes)
-    @Override
-    public void onResume() {
-        super.onResume();
-        map.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        map.onPause();
+        } catch (Exception e) { return null; }
     }
 }
